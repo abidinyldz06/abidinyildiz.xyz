@@ -14,6 +14,12 @@ import ThemeToggle from './ThemeToggle.astro';
   </nav>
 
   <div class="flex items-center gap-4">
+    <!-- Search Button -->
+    <button id="search-btn" class="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-forest-text-light dark:text-forest-text-dark hover:bg-forest-text-light/10 dark:hover:bg-white/10 transition-colors focus:outline-none relative">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      <span class="absolute -top-1 -right-1 text-[8px] bg-forest-accent-light dark:bg-forest-accent-dark text-black px-1.5 py-0.5 rounded-full font-bold shadow-lg">/</span>
+    </button>
+    
     <ThemeToggle />
     <!-- Profile Mini -->
     <a href="/hesap" class="w-8 h-8 rounded-full bg-forest-accent-light/20 border border-forest-accent-light/50 dark:border-forest-accent-dark/50 overflow-hidden shadow-[0_0_10px_rgba(74,222,128,0.2)] block">
@@ -27,6 +33,20 @@ import ThemeToggle from './ThemeToggle.astro';
   </div>
 </header>
 
+<!-- Search Modal -->
+<div id="search-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-start justify-center pt-24 hidden opacity-0 transition-opacity">
+  <div class="bg-forest-bg-light dark:bg-forest-bg-dark w-full max-w-2xl rounded-2xl shadow-2xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 overflow-hidden flex flex-col transform -translate-y-4 transition-transform duration-300 mx-4" id="search-modal-content">
+    <div class="p-4 border-b border-black/10 dark:border-white/10 flex items-center gap-3">
+      <svg class="w-6 h-6 text-forest-text-light/50 dark:text-forest-text-dark/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      <input type="text" id="search-input" placeholder="Tohum veya yaprak ara..." class="flex-1 bg-transparent outline-none text-xl text-forest-text-light dark:text-forest-text-dark placeholder-forest-text-light/30 dark:placeholder-forest-text-dark/30" />
+      <button id="close-search-btn" class="p-2 text-forest-text-light/50 hover:text-forest-text-light dark:text-forest-text-dark/50 dark:hover:text-forest-text-dark rounded-xl bg-black/5 dark:bg-white/5 font-mono text-xs">ESC</button>
+    </div>
+    <div class="max-h-[60vh] overflow-y-auto p-2" id="search-results">
+      <div class="p-8 text-center text-forest-text-light/40 dark:text-forest-text-dark/40 font-medium">Aramaya başlamak için yazın...</div>
+    </div>
+  </div>
+</div>
+
 <!-- Mobile Navigation Drawer -->
 <div id="mobile-drawer" class="fixed inset-0 bg-forest-bg-light/95 dark:bg-forest-bg-dark/95 z-50 transform translate-x-full transition-transform duration-300 md:hidden flex flex-col pt-20 px-8">
   <button id="close-drawer-btn" class="absolute top-6 right-8 text-forest-text-light dark:text-forest-text-dark p-2">
@@ -39,6 +59,9 @@ import ThemeToggle from './ThemeToggle.astro';
     <a href="/hesap" class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark transition-colors">Profil ve Ayarlar</a>
   </nav>
 </div>
+
+<!-- Fuse.js -->
+<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>
 
 <script>
   // Topnav avatar sync
@@ -62,5 +85,112 @@ import ThemeToggle from './ThemeToggle.astro';
 
   closeBtn?.addEventListener('click', () => {
     drawer?.classList.add('translate-x-full');
+  });
+
+  // Search Logic
+  const searchBtn = document.getElementById('search-btn');
+  const searchModal = document.getElementById('search-modal');
+  const searchModalContent = document.getElementById('search-modal-content');
+  const closeSearchBtn = document.getElementById('close-search-btn');
+  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const searchResults = document.getElementById('search-results');
+
+  let fuse: any = null;
+  let searchData = [];
+
+  const openSearch = async () => {
+    if (searchModal) {
+      searchModal.classList.remove('hidden');
+      setTimeout(() => {
+        searchModal.classList.remove('opacity-0');
+        searchModalContent?.classList.remove('-translate-y-4');
+        searchInput?.focus();
+      }, 10);
+      
+      // Fetch data if not already fetched
+      if (!fuse) {
+        try {
+          const res = await fetch('/api/search.json');
+          searchData = await res.json();
+          // @ts-ignore
+          fuse = new Fuse(searchData, {
+            keys: ['title', 'description', 'type'],
+            threshold: 0.3,
+            ignoreLocation: true
+          });
+        } catch (e) {
+          console.error('Arama verisi yüklenemedi', e);
+        }
+      }
+    }
+  };
+
+  const closeSearch = () => {
+    if (searchModal) {
+      searchModal.classList.add('opacity-0');
+      searchModalContent?.classList.add('-translate-y-4');
+      setTimeout(() => searchModal.classList.add('hidden'), 300);
+      if (searchInput) searchInput.value = '';
+      if (searchResults) searchResults.innerHTML = '<div class="p-8 text-center text-forest-text-light/40 dark:text-forest-text-dark/40 font-medium">Aramaya başlamak için yazın...</div>';
+    }
+  };
+
+  searchBtn?.addEventListener('click', openSearch);
+  closeSearchBtn?.addEventListener('click', closeSearch);
+  
+  // Close on backdrop click
+  searchModal?.addEventListener('click', (e) => {
+    if (e.target === searchModal) closeSearch();
+  });
+
+  // Keyboard shortcut (Ctrl+K or /)
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA')) {
+      e.preventDefault();
+      openSearch();
+    }
+    if (e.key === 'Escape') {
+      closeSearch();
+    }
+  });
+
+  // Perform search
+  searchInput?.addEventListener('input', (e) => {
+    const query = (e.target as HTMLInputElement).value;
+    if (!query) {
+      if (searchResults) searchResults.innerHTML = '<div class="p-8 text-center text-forest-text-light/40 dark:text-forest-text-dark/40 font-medium">Aramaya başlamak için yazın...</div>';
+      return;
+    }
+    
+    if (fuse && searchResults) {
+      const results = fuse.search(query);
+      
+      if (results.length === 0) {
+        searchResults.innerHTML = '<div class="p-8 text-center text-forest-text-light/40 dark:text-forest-text-dark/40 font-medium">Sonuç bulunamadı.</div>';
+        return;
+      }
+      
+      let html = '';
+      results.forEach(({ item }: any) => {
+        html += `
+          <a href="${item.url}" class="flex items-center gap-4 p-3 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors group">
+            <div class="w-10 h-10 rounded-full bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+              ${item.icon}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <h4 class="font-bold text-forest-text-light dark:text-forest-text-dark truncate group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark transition-colors">${item.title}</h4>
+                <span class="text-[10px] px-2 py-0.5 rounded-full ${item.type === 'Tohum' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'} font-bold uppercase tracking-wider">${item.type}</span>
+              </div>
+              <p class="text-xs text-forest-text-light/50 dark:text-forest-text-dark/50 truncate mt-1">
+                ${item.description ? item.description.substring(0, 100) + '...' : ''}
+              </p>
+            </div>
+            <svg class="w-5 h-5 text-forest-text-light/30 dark:text-forest-text-dark/30 group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </a>
+        `;
+      });
+      searchResults.innerHTML = html;
+    }
   });
 </script>

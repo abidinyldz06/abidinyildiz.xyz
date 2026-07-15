@@ -7,15 +7,20 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "sync": "node sync.js"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.3",
     "@astrojs/sitemap": "^3.7.3",
     "@tailwindcss/vite": "^4.3.2",
     "astro": "^7.0.9",
+    "dotenv": "^17.4.2",
+    "fs-extra": "^11.3.6",
+    "fuse.js": "^7.5.0",
     "remark-wiki-link": "^2.0.1",
     "tailwindcss": "^4.3.2"
   }
