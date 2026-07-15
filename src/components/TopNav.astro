@@ -1,196 +1,218 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import SettingsModal from './SettingsModal.astro';
+
+const currentPath = Astro.url.pathname;
+const navItems = [
+  { href: '/', label: 'Bahçe' },
+  { href: '/kulliyat', label: 'Külliyat' },
+  { href: '/gelisim', label: 'Gelişim' },
+  { href: '/simdi', label: 'Şimdi' },
+];
+
+const isActive = (href: string) => href === '/'
+  ? currentPath === '/'
+  : currentPath.startsWith(href);
 ---
-<header class="h-20 w-full flex items-center justify-between px-8 relative z-20">
-  <div class="flex items-center">
-    <h1 class="text-2xl font-serif font-bold text-forest-text-light dark:text-forest-text-dark glow-text tracking-tight">Yaşayan Orman</h1>
-  </div>
+
+<header class="h-20 w-full shrink-0 flex items-center justify-between px-4 sm:px-6 lg:px-8 relative z-20">
+  <a href="/" class="flex items-center gap-2 min-w-0" aria-label="Yaşayan Orman ana sayfa">
+    <span aria-hidden="true">🌲</span>
+    <span class="text-xl sm:text-2xl font-serif font-bold text-forest-text-light dark:text-forest-text-dark glow-text tracking-tight truncate">Yaşayan Orman</span>
+  </a>
   
-  <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-forest-text-light/60 dark:text-forest-text-dark/60 uppercase tracking-widest">
-    <a href="#" class="text-forest-accent-light dark:text-forest-accent-dark border-b-2 border-forest-accent-light dark:border-forest-accent-dark pb-1">Bahçe</a>
-    <a href="#" class="hover:text-forest-text-light dark:hover:text-forest-text-dark transition-colors pb-1">Külliyat</a>
-    <a href="#" class="hover:text-forest-text-light dark:hover:text-forest-text-dark transition-colors pb-1">Gelişim</a>
-    <a href="#" class="hover:text-forest-text-light dark:hover:text-forest-text-dark transition-colors pb-1">Sığınak</a>
+  <nav aria-label="Ana navigasyon" class="hidden xl:flex items-center gap-7 text-sm font-medium text-forest-text-light/60 dark:text-forest-text-dark/60 uppercase tracking-widest">
+    {navItems.map(item => (
+      <a
+        href={item.href}
+        aria-current={isActive(item.href) ? 'page' : undefined}
+        class:list={[
+          'pb-1 transition-colors hover:text-forest-text-light dark:hover:text-forest-text-dark',
+          isActive(item.href) && 'text-forest-accent-light dark:text-forest-accent-dark border-b-2 border-forest-accent-light dark:border-forest-accent-dark',
+        ]}
+      >
+        {item.label}
+      </a>
+    ))}
   </nav>
 
-  <div class="flex items-center gap-4">
-    <!-- Search Button -->
-    <button id="search-btn" class="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-forest-text-light dark:text-forest-text-dark hover:bg-forest-text-light/10 dark:hover:bg-white/10 transition-colors focus:outline-none relative">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-      <span class="absolute -top-1 -right-1 text-[8px] bg-forest-accent-light dark:bg-forest-accent-dark text-black px-1.5 py-0.5 rounded-full font-bold shadow-lg">/</span>
+  <div class="flex items-center gap-2 sm:gap-3">
+    <button id="search-btn" type="button" aria-label="Sitede ara" aria-haspopup="dialog" class="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center text-forest-text-light dark:text-forest-text-dark hover:bg-forest-text-light/10 dark:hover:bg-white/10 transition-colors relative">
+      <svg aria-hidden="true" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      <span aria-hidden="true" class="absolute -top-1 -right-1 text-[8px] bg-forest-accent-light dark:bg-forest-accent-dark text-black px-1.5 py-0.5 rounded-full font-bold shadow-lg">/</span>
     </button>
     
     <ThemeToggle />
-    <!-- Profile Mini -->
-    <a href="/hesap" class="w-8 h-8 rounded-full bg-forest-accent-light/20 border border-forest-accent-light/50 dark:border-forest-accent-dark/50 overflow-hidden shadow-[0_0_10px_rgba(74,222,128,0.2)] block">
-      <img id="topnav-avatar" src="/avatars/caretaker.png" alt="Profile" class="w-full h-full object-cover" />
-    </a>
+
+    <button id="profile-settings-btn" type="button" aria-label="Hızlı profil ve görünüm ayarlarını aç" aria-haspopup="dialog" class="hidden sm:block w-9 h-9 rounded-full bg-forest-accent-light/20 border border-forest-accent-light/50 dark:border-forest-accent-dark/50 overflow-hidden shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:scale-105 transition-transform">
+      <img id="topnav-avatar" src="/avatars/caretaker.png" alt="" class="w-full h-full object-cover" />
+    </button>
     
-    <!-- Mobile Menu Button -->
-    <button id="mobile-menu-btn" class="md:hidden text-forest-text-light dark:text-forest-text-dark p-2 focus:outline-none">
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+    <button id="mobile-menu-btn" type="button" aria-label="Menüyü aç" aria-controls="mobile-drawer" aria-expanded="false" class="xl:hidden text-forest-text-light dark:text-forest-text-dark p-2">
+      <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
     </button>
   </div>
 </header>
 
-<!-- Search Modal -->
-<div id="search-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-start justify-center pt-24 hidden opacity-0 transition-opacity">
+<SettingsModal />
+
+<div id="search-modal" role="dialog" aria-modal="true" aria-labelledby="search-title" aria-hidden="true" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-start justify-center pt-20 sm:pt-24 hidden opacity-0 transition-opacity">
   <div class="bg-forest-bg-light dark:bg-forest-bg-dark w-full max-w-2xl rounded-2xl shadow-2xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 overflow-hidden flex flex-col transform -translate-y-4 transition-transform duration-300 mx-4" id="search-modal-content">
+    <h2 id="search-title" class="sr-only">Sitede ara</h2>
     <div class="p-4 border-b border-black/10 dark:border-white/10 flex items-center gap-3">
-      <svg class="w-6 h-6 text-forest-text-light/50 dark:text-forest-text-dark/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-      <input type="text" id="search-input" placeholder="Tohum veya yaprak ara..." class="flex-1 bg-transparent outline-none text-xl text-forest-text-light dark:text-forest-text-dark placeholder-forest-text-light/30 dark:placeholder-forest-text-dark/30" />
-      <button id="close-search-btn" class="p-2 text-forest-text-light/50 hover:text-forest-text-light dark:text-forest-text-dark/50 dark:hover:text-forest-text-dark rounded-xl bg-black/5 dark:bg-white/5 font-mono text-xs">ESC</button>
+      <svg aria-hidden="true" class="w-6 h-6 text-forest-text-light/50 dark:text-forest-text-dark/50 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      <label for="search-input" class="sr-only">Tohum, yaprak veya not ara</label>
+      <input type="search" id="search-input" autocomplete="off" placeholder="Tohum, yaprak veya not ara..." class="flex-1 min-w-0 bg-transparent outline-none text-base sm:text-xl text-forest-text-light dark:text-forest-text-dark placeholder-forest-text-light/30 dark:placeholder-forest-text-dark/30" />
+      <button id="close-search-btn" type="button" aria-label="Aramayı kapat" class="p-2 text-forest-text-light/50 hover:text-forest-text-light dark:text-forest-text-dark/50 dark:hover:text-forest-text-dark rounded-xl bg-black/5 dark:bg-white/5 font-mono text-xs">ESC</button>
     </div>
-    <div class="max-h-[60vh] overflow-y-auto p-2" id="search-results">
+    <div class="max-h-[60vh] overflow-y-auto p-2" id="search-results" aria-live="polite">
       <div class="p-8 text-center text-forest-text-light/40 dark:text-forest-text-dark/40 font-medium">Aramaya başlamak için yazın...</div>
     </div>
   </div>
 </div>
 
-<!-- Mobile Navigation Drawer -->
-<div id="mobile-drawer" class="fixed inset-0 bg-forest-bg-light/95 dark:bg-forest-bg-dark/95 z-50 transform translate-x-full transition-transform duration-300 md:hidden flex flex-col pt-20 px-8">
-  <button id="close-drawer-btn" class="absolute top-6 right-8 text-forest-text-light dark:text-forest-text-dark p-2">
-    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+<div id="mobile-drawer" aria-hidden="true" inert class="fixed inset-0 bg-forest-bg-light/98 dark:bg-forest-bg-dark/98 z-50 transform translate-x-full transition-transform duration-300 xl:hidden flex flex-col pt-20 px-8">
+  <button id="close-drawer-btn" type="button" aria-label="Menüyü kapat" class="absolute top-6 right-6 sm:right-8 text-forest-text-light dark:text-forest-text-dark p-2">
+    <svg aria-hidden="true" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
   </button>
-  <nav class="flex flex-col gap-6 text-xl font-medium text-forest-text-light dark:text-forest-text-dark text-center">
-    <a href="/" class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark transition-colors">Fidanlık</a>
-    <a href="/ekosistem" class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark transition-colors">Ekosistem</a>
-    <a href="/gelisim" class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark transition-colors">Gelişim</a>
-    <a href="/hesap" class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark transition-colors">Profil ve Ayarlar</a>
+  <nav aria-label="Mobil navigasyon" class="flex flex-col gap-2 text-lg font-medium text-forest-text-light dark:text-forest-text-dark">
+    {navItems.map(item => (
+      <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} class:list={['rounded-xl px-4 py-3 transition-colors', isActive(item.href) ? 'bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 text-forest-accent-light dark:text-forest-accent-dark' : 'hover:bg-black/5 dark:hover:bg-white/5']}>{item.label}</a>
+    ))}
+    <a href="/kadim-agaclar" class="rounded-xl px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5">Kadim Ağaçlar</a>
+    <a href="/ekosistem" class="rounded-xl px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5">Ekosistem</a>
+    <a href="/yapraklar" class="rounded-xl px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5">Tüm Yapraklar</a>
+    <a href="/hesap" class="rounded-xl px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5">Profil ve Ayarlar</a>
   </nav>
 </div>
 
-<!-- Fuse.js -->
-<script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.js"></script>
-
 <script>
-  // Topnav avatar sync
-  const data = localStorage.getItem('caretaker');
-  if (data) {
+  import Fuse from 'fuse.js';
+
+  interface SearchItem {
+    title: string;
+    description: string;
+    type: string;
+    url: string;
+    icon: string;
+  }
+
+  const escapeHTML = (value: string) => value.replace(/[&<>'"]/g, character => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+  })[character] || character);
+
+  const storedCaretaker = localStorage.getItem('caretaker');
+  if (storedCaretaker) {
     try {
-      const c = JSON.parse(data);
-      const av = document.getElementById('topnav-avatar') as HTMLImageElement;
-      if (av) av.src = c.avatar;
+      const caretaker = JSON.parse(storedCaretaker);
+      const avatar = document.getElementById('topnav-avatar') as HTMLImageElement | null;
+      if (avatar && typeof caretaker.avatar === 'string') avatar.src = caretaker.avatar;
     } catch {}
   }
 
-  // Mobile Menu Logic
-  const menuBtn = document.getElementById('mobile-menu-btn');
-  const closeBtn = document.getElementById('close-drawer-btn');
+  const menuButton = document.getElementById('mobile-menu-btn');
+  const closeDrawerButton = document.getElementById('close-drawer-btn');
   const drawer = document.getElementById('mobile-drawer');
 
-  menuBtn?.addEventListener('click', () => {
-    drawer?.classList.remove('translate-x-full');
-  });
+  const setDrawer = (open: boolean) => {
+    drawer?.classList.toggle('translate-x-full', !open);
+    drawer?.setAttribute('aria-hidden', String(!open));
+    drawer?.toggleAttribute('inert', !open);
+    menuButton?.setAttribute('aria-expanded', String(open));
+    if (open) closeDrawerButton?.focus();
+  };
 
-  closeBtn?.addEventListener('click', () => {
-    drawer?.classList.add('translate-x-full');
-  });
+  menuButton?.addEventListener('click', () => setDrawer(true));
+  closeDrawerButton?.addEventListener('click', () => setDrawer(false));
 
-  // Search Logic
-  const searchBtn = document.getElementById('search-btn');
+  const searchButton = document.getElementById('search-btn');
   const searchModal = document.getElementById('search-modal');
   const searchModalContent = document.getElementById('search-modal-content');
-  const closeSearchBtn = document.getElementById('close-search-btn');
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
+  const closeSearchButton = document.getElementById('close-search-btn');
+  const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
   const searchResults = document.getElementById('search-results');
 
-  let fuse: any = null;
-  let searchData = [];
+  let fuse: Fuse<SearchItem> | null = null;
 
   const openSearch = async () => {
-    if (searchModal) {
-      searchModal.classList.remove('hidden');
-      setTimeout(() => {
-        searchModal.classList.remove('opacity-0');
-        searchModalContent?.classList.remove('-translate-y-4');
-        searchInput?.focus();
-      }, 10);
-      
-      // Fetch data if not already fetched
-      if (!fuse) {
-        try {
-          const res = await fetch('/api/search.json');
-          searchData = await res.json();
-          // @ts-ignore
-          fuse = new Fuse(searchData, {
-            keys: ['title', 'description', 'type'],
-            threshold: 0.3,
-            ignoreLocation: true
-          });
-        } catch (e) {
-          console.error('Arama verisi yüklenemedi', e);
-        }
+    if (!searchModal) return;
+    searchModal.classList.remove('hidden');
+    searchModal.setAttribute('aria-hidden', 'false');
+    window.setTimeout(() => {
+      searchModal.classList.remove('opacity-0');
+      searchModalContent?.classList.remove('-translate-y-4');
+      searchInput?.focus();
+    }, 10);
+
+    if (!fuse) {
+      if (searchResults) searchResults.innerHTML = '<div class="p-8 text-center text-forest-text-light/50 dark:text-forest-text-dark/50">Arama dizini yükleniyor...</div>';
+      try {
+        const response = await fetch('/api/search.json');
+        if (!response.ok) throw new Error('Arama dizini alınamadı');
+        const searchData = await response.json() as SearchItem[];
+        fuse = new Fuse(searchData, { keys: ['title', 'description', 'type'], threshold: 0.3, ignoreLocation: true });
+        if (searchResults) searchResults.innerHTML = '<div class="p-8 text-center text-forest-text-light/40 dark:text-forest-text-dark/40 font-medium">Aramaya başlamak için yazın...</div>';
+      } catch {
+        if (searchResults) searchResults.innerHTML = '<div class="p-8 text-center text-red-600 dark:text-red-400">Arama şu anda yüklenemiyor.</div>';
       }
     }
   };
 
   const closeSearch = () => {
-    if (searchModal) {
-      searchModal.classList.add('opacity-0');
-      searchModalContent?.classList.add('-translate-y-4');
-      setTimeout(() => searchModal.classList.add('hidden'), 300);
-      if (searchInput) searchInput.value = '';
-      if (searchResults) searchResults.innerHTML = '<div class="p-8 text-center text-forest-text-light/40 dark:text-forest-text-dark/40 font-medium">Aramaya başlamak için yazın...</div>';
-    }
+    if (!searchModal) return;
+    searchModal.classList.add('opacity-0');
+    searchModalContent?.classList.add('-translate-y-4');
+    searchModal.setAttribute('aria-hidden', 'true');
+    window.setTimeout(() => searchModal.classList.add('hidden'), 300);
+    if (searchInput) searchInput.value = '';
+    searchButton?.focus();
   };
 
-  searchBtn?.addEventListener('click', openSearch);
-  closeSearchBtn?.addEventListener('click', closeSearch);
-  
-  // Close on backdrop click
-  searchModal?.addEventListener('click', (e) => {
-    if (e.target === searchModal) closeSearch();
+  searchButton?.addEventListener('click', openSearch);
+  closeSearchButton?.addEventListener('click', closeSearch);
+  searchModal?.addEventListener('click', event => {
+    if (event.target === searchModal) closeSearch();
   });
 
-  // Keyboard shortcut (Ctrl+K or /)
-  document.addEventListener('keydown', (e) => {
-    if ((e.key === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA')) {
-      e.preventDefault();
+  document.addEventListener('keydown', event => {
+    const target = document.activeElement?.tagName;
+    if ((event.key === 'k' && (event.ctrlKey || event.metaKey)) || (event.key === '/' && target !== 'INPUT' && target !== 'TEXTAREA')) {
+      event.preventDefault();
       openSearch();
     }
-    if (e.key === 'Escape') {
-      closeSearch();
+    if (event.key === 'Escape') {
+      if (searchModal?.getAttribute('aria-hidden') === 'false') closeSearch();
+      setDrawer(false);
     }
   });
 
-  // Perform search
-  searchInput?.addEventListener('input', (e) => {
-    const query = (e.target as HTMLInputElement).value;
+  searchInput?.addEventListener('input', event => {
+    if (!searchResults) return;
+    const query = (event.target as HTMLInputElement).value.trim();
     if (!query) {
-      if (searchResults) searchResults.innerHTML = '<div class="p-8 text-center text-forest-text-light/40 dark:text-forest-text-dark/40 font-medium">Aramaya başlamak için yazın...</div>';
+      searchResults.innerHTML = '<div class="p-8 text-center text-forest-text-light/40 dark:text-forest-text-dark/40 font-medium">Aramaya başlamak için yazın...</div>';
       return;
     }
-    
-    if (fuse && searchResults) {
-      const results = fuse.search(query);
-      
-      if (results.length === 0) {
-        searchResults.innerHTML = '<div class="p-8 text-center text-forest-text-light/40 dark:text-forest-text-dark/40 font-medium">Sonuç bulunamadı.</div>';
-        return;
-      }
-      
-      let html = '';
-      results.forEach(({ item }: any) => {
-        html += `
-          <a href="${item.url}" class="flex items-center gap-4 p-3 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors group">
-            <div class="w-10 h-10 rounded-full bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
-              ${item.icon}
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2">
-                <h4 class="font-bold text-forest-text-light dark:text-forest-text-dark truncate group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark transition-colors">${item.title}</h4>
-                <span class="text-[10px] px-2 py-0.5 rounded-full ${item.type === 'Tohum' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-blue-500/10 text-blue-600 dark:text-blue-400'} font-bold uppercase tracking-wider">${item.type}</span>
-              </div>
-              <p class="text-xs text-forest-text-light/50 dark:text-forest-text-dark/50 truncate mt-1">
-                ${item.description ? item.description.substring(0, 100) + '...' : ''}
-              </p>
-            </div>
-            <svg class="w-5 h-5 text-forest-text-light/30 dark:text-forest-text-dark/30 group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-          </a>
-        `;
-      });
-      searchResults.innerHTML = html;
+    if (!fuse) return;
+
+    const results = fuse.search(query).slice(0, 12);
+    if (results.length === 0) {
+      searchResults.innerHTML = '<div class="p-8 text-center text-forest-text-light/40 dark:text-forest-text-dark/40 font-medium">Sonuç bulunamadı.</div>';
+      return;
     }
+
+    searchResults.innerHTML = results.map(({ item }) => `
+      <a href="${escapeHTML(item.url)}" class="flex items-center gap-4 p-3 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors group">
+        <span class="w-10 h-10 rounded-full bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 flex items-center justify-center text-xl shrink-0">${escapeHTML(item.icon)}</span>
+        <span class="flex-1 min-w-0">
+          <span class="flex items-center gap-2">
+            <strong class="text-forest-text-light dark:text-forest-text-dark truncate">${escapeHTML(item.title)}</strong>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 text-forest-accent-light dark:text-forest-accent-dark font-bold uppercase tracking-wider">${escapeHTML(item.type)}</span>
+          </span>
+          <span class="block text-xs text-forest-text-light/50 dark:text-forest-text-dark/50 truncate mt-1">${escapeHTML(item.description || '').slice(0, 120)}</span>
+        </span>
+        <span aria-hidden="true" class="text-forest-text-light/30 dark:text-forest-text-dark/30">→</span>
+      </a>
+    `).join('');
   });
 </script>

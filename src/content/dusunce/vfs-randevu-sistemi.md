@@ -9,4 +9,4 @@ gray: false
 
 Schengen ülkeleri tek tek VFS'e geçti...
 
-İlgili: [[Schengen Vize Süreci]] [[Nobel Vize Günlük]]
+İlgili taslaklar: Schengen Vize Süreci, Nobel Vize Günlük.

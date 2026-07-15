@@ -1,0 +1,148 @@
+---
+import { TITLES } from '../lib/caretaker';
+---
+
+<div id="quick-settings-modal" role="dialog" aria-modal="true" aria-labelledby="quick-settings-title" aria-hidden="true" inert class="fixed inset-0 z-[70] hidden bg-black/30 backdrop-blur-sm p-3 sm:p-5">
+  <section id="quick-settings-panel" class="ml-auto mt-14 sm:mt-16 w-full max-w-md rounded-2xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 bg-[#f7faf3] dark:bg-[#0f1e15] shadow-2xl overflow-hidden translate-y-[-10px] opacity-0 transition-all duration-200">
+    <header class="flex items-start justify-between gap-4 p-5 border-b border-forest-accent-light/15 dark:border-forest-accent-dark/10">
+      <div>
+        <p class="text-[10px] font-bold uppercase tracking-[0.22em] text-forest-accent-light dark:text-forest-accent-dark">Hızlı ayarlar</p>
+        <h2 id="quick-settings-title" class="text-2xl font-serif font-bold mt-1">Bahçıvan Profili</h2>
+      </div>
+      <button id="close-settings-btn" type="button" aria-label="Hızlı ayarları kapat" class="w-9 h-9 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-lg">×</button>
+    </header>
+
+    <form id="quick-settings-form" class="p-5 space-y-5">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <label class="block text-xs font-bold text-forest-text-light/70 dark:text-forest-text-dark/70">
+          Bahçıvan adı
+          <input id="quick-name" type="text" autocomplete="nickname" class="mt-2 w-full rounded-xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 bg-white/70 dark:bg-black/20 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-forest-accent-light/30 dark:focus:ring-forest-accent-dark/30" />
+        </label>
+        <label class="block text-xs font-bold text-forest-text-light/70 dark:text-forest-text-dark/70">
+          Unvan
+          <select id="quick-title" class="mt-2 w-full rounded-xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 bg-white/70 dark:bg-[#122419] px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-forest-accent-light/30 dark:focus:ring-forest-accent-dark/30">
+            {TITLES.map(title => <option value={title.label}>{title.label}</option>)}
+          </select>
+        </label>
+      </div>
+
+      <label class="block text-xs font-bold text-forest-text-light/70 dark:text-forest-text-dark/70">
+        Bahçe adı
+        <input id="quick-garden-name" type="text" autocomplete="off" class="mt-2 w-full rounded-xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 bg-white/70 dark:bg-black/20 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-forest-accent-light/30 dark:focus:ring-forest-accent-dark/30" />
+      </label>
+
+      <fieldset>
+        <legend class="text-xs font-bold text-forest-text-light/70 dark:text-forest-text-dark/70 mb-2">Görünüm</legend>
+        <div class="grid grid-cols-3 gap-2 rounded-xl bg-black/5 dark:bg-white/5 p-1.5">
+          <button type="button" data-theme-choice="light" aria-pressed="false" class="theme-choice rounded-lg px-2 py-2 text-xs font-bold transition-colors">☀️ Aydınlık</button>
+          <button type="button" data-theme-choice="dark" aria-pressed="false" class="theme-choice rounded-lg px-2 py-2 text-xs font-bold transition-colors">🌙 Karanlık</button>
+          <button type="button" data-theme-choice="system" aria-pressed="false" class="theme-choice rounded-lg px-2 py-2 text-xs font-bold transition-colors">◐ Sistem</button>
+        </div>
+      </fieldset>
+
+      <div class="flex flex-col-reverse sm:flex-row gap-3 pt-1">
+        <a href="/hesap" class="flex-1 rounded-xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 px-4 py-3 text-center text-sm font-bold hover:bg-black/5 dark:hover:bg-white/5">Tüm ayarlar</a>
+        <button type="submit" class="flex-1 rounded-xl bg-forest-text-light dark:bg-forest-accent-dark px-4 py-3 text-sm font-bold text-white dark:text-[#07130b] hover:opacity-90">Değişiklikleri kaydet</button>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script>
+  const settingsTrigger = document.getElementById('profile-settings-btn');
+  const settingsModal = document.getElementById('quick-settings-modal');
+  const settingsPanel = document.getElementById('quick-settings-panel');
+  const settingsClose = document.getElementById('close-settings-btn');
+  const settingsForm = document.getElementById('quick-settings-form');
+  const quickName = document.getElementById('quick-name') as HTMLInputElement | null;
+  const quickTitle = document.getElementById('quick-title') as HTMLSelectElement | null;
+  const quickGardenName = document.getElementById('quick-garden-name') as HTMLInputElement | null;
+  const themeChoices = [...document.querySelectorAll<HTMLButtonElement>('[data-theme-choice]')];
+
+  const readCaretaker = () => {
+    try { return JSON.parse(localStorage.getItem('caretaker') || '{}'); }
+    catch { return {}; }
+  };
+
+  const markTheme = (choice: string) => {
+    themeChoices.forEach(button => {
+      const active = button.dataset.themeChoice === choice;
+      button.setAttribute('aria-pressed', String(active));
+      button.classList.toggle('bg-white', active);
+      button.classList.toggle('dark:bg-forest-accent-dark', active);
+      button.classList.toggle('shadow-sm', active);
+      button.classList.toggle('dark:text-[#07130b]', active);
+    });
+  };
+
+  const applyTheme = (choice: string) => {
+    const dark = choice === 'dark' || (choice === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('dark', dark);
+    localStorage.setItem('theme', choice);
+    markTheme(choice);
+    window.dispatchEvent(new CustomEvent('theme-changed', { detail: choice }));
+  };
+
+  const openSettings = () => {
+    if (!settingsModal) return;
+    const caretaker = readCaretaker();
+    if (quickName) quickName.value = caretaker.name || 'Bahçıvan Abidin';
+    if (quickTitle) quickTitle.value = caretaker.title || '🌲 Ormancı';
+    if (quickGardenName) quickGardenName.value = caretaker.gardenName || 'Yaşayan Orman';
+    markTheme(localStorage.getItem('theme') || 'system');
+    settingsModal.classList.remove('hidden');
+    settingsModal.toggleAttribute('inert', false);
+    settingsModal.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(() => {
+      settingsPanel?.classList.remove('translate-y-[-10px]', 'opacity-0');
+      quickName?.focus();
+    });
+  };
+
+  const closeSettings = () => {
+    if (!settingsModal) return;
+    settingsPanel?.classList.add('translate-y-[-10px]', 'opacity-0');
+    settingsModal.setAttribute('aria-hidden', 'true');
+    window.setTimeout(() => {
+      settingsModal.classList.add('hidden');
+      settingsModal.toggleAttribute('inert', true);
+    }, 200);
+    settingsTrigger?.focus();
+  };
+
+  settingsTrigger?.addEventListener('click', openSettings);
+  settingsClose?.addEventListener('click', closeSettings);
+  settingsModal?.addEventListener('click', event => {
+    if (event.target === settingsModal) closeSettings();
+  });
+  themeChoices.forEach(button => button.addEventListener('click', () => applyTheme(button.dataset.themeChoice || 'system')));
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (localStorage.getItem('theme') === 'system') applyTheme('system');
+  });
+
+  settingsForm?.addEventListener('submit', event => {
+    event.preventDefault();
+    const previous = readCaretaker();
+    const caretaker = {
+      ...previous,
+      name: quickName?.value.trim() || 'Bahçıvan Abidin',
+      title: quickTitle?.value || '🌲 Ormancı',
+      gardenName: quickGardenName?.value.trim() || 'Yaşayan Orman',
+      avatar: previous.avatar || '/avatars/caretaker.png',
+      createdAt: previous.createdAt || new Date().toISOString(),
+      level: previous.level || 1,
+      xp: previous.xp || 0,
+      xpToNext: previous.xpToNext || 100,
+      achievements: Array.isArray(previous.achievements) ? previous.achievements : [],
+    };
+    localStorage.setItem('caretaker', JSON.stringify(caretaker));
+    document.getElementById('sidebar-name')?.replaceChildren(caretaker.name);
+    document.getElementById('sidebar-title')?.replaceChildren(caretaker.title);
+    window.dispatchEvent(new CustomEvent('caretaker-updated', { detail: caretaker }));
+    closeSettings();
+  });
+
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && settingsModal?.getAttribute('aria-hidden') === 'false') closeSettings();
+  });
+</script>

@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import Sidebar from '../components/Sidebar.astro';
+import TopNav from '../components/TopNav.astro';
+import { getCollection } from 'astro:content';
+
+const leaves = (await getCollection('leaves')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const seeds = await getCollection('seeds');
+const formatDate = (date: Date) => new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+---
+
+<Base title="Tüm Yapraklar — Yaşayan Orman" description="Yaşayan Orman’daki bütün yazılar ve gelişim notları.">
+  <Sidebar />
+  <main id="main-content" class="flex-1 h-full min-w-0 flex flex-col relative z-10">
+    <TopNav />
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-20">
+      <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl md:text-5xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark mb-3">Tüm Yapraklar</h1>
+        <p class="text-forest-text-light/60 dark:text-forest-text-dark/60 mb-9">Ağaçlara eklenmiş {leaves.length} gelişim kaydı, en yeniden eskiye.</p>
+        <div class="space-y-4">
+          {leaves.map(leaf => {
+            const seed = seeds.find(candidate => candidate.id === leaf.data.seedRef);
+            return <a href={`/leaves/${leaf.id}`} class="dashboard-card group p-5 sm:p-6 flex gap-4 sm:gap-6 items-start">
+              <span class="w-11 h-11 shrink-0 rounded-xl bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 flex items-center justify-center text-xl" aria-hidden="true">🍃</span>
+              <span class="flex-1 min-w-0">
+                <span class="text-xs font-bold uppercase tracking-widest text-forest-accent-light dark:text-forest-accent-dark">{seed ? `${seed.data.icon} ${seed.data.title}` : 'Yaprak'}</span>
+                <strong class="block text-lg font-serif text-forest-text-light dark:text-forest-text-dark group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark mt-1">{leaf.data.title}</strong>
+                <span class="block text-xs text-forest-text-light/45 dark:text-forest-text-dark/45 mt-2">{formatDate(leaf.data.date)}</span>
+              </span>
+              <span aria-hidden="true" class="text-forest-text-light/30 dark:text-forest-text-dark/30 group-hover:translate-x-1 transition-transform">→</span>
+            </a>;
+          })}
+        </div>
+      </div>
+    </div>
+  </main>
+</Base>

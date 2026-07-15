@@ -15,7 +15,7 @@ const totalLeaves = leaves.length;
 
 const stageCount = { seed: 0, seedling: 0, sapling: 0, tree: 0 };
 seeds.forEach(s => {
-  const stage = getStageInfo(new Date(s.data.plantedAt)).key;
+  const stage = s.data.maturity === 'ancient' ? 'tree' : getStageInfo(new Date(s.data.plantedAt)).key;
   stageCount[stage]++;
 });
 
@@ -33,10 +33,10 @@ const oldestDays = oldestSeed ? daysSince(new Date(oldestSeed.data.plantedAt)) :
 
 <Base title="Yaşayan Orman — Gelişim">
   <Sidebar />
-  <main class="flex-1 h-full flex flex-col relative z-10">
+  <main id="main-content" class="flex-1 h-full min-w-0 flex flex-col relative z-10">
     <TopNav />
     
-    <div class="flex-1 overflow-y-auto p-8">
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-20">
       <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <div class="mb-10">

@@ -14,7 +14,10 @@ const leaves = await getCollection('leaves');
 // Build seed cards with real growth calculation
 const seedCards = seeds.map((seed) => {
   const plantedAt = new Date(seed.data.plantedAt);
-  const stageInfo = getStageInfo(plantedAt);
+  const automaticStage = getStageInfo(plantedAt);
+  const stageInfo = seed.data.maturity === 'ancient'
+    ? { ...automaticStage, key: 'tree' as const, label: 'Kadim Ağaç', icon: '🌲', color: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/20' }
+    : automaticStage;
   
   // Count leaves for this seed
   const seedLeaves = leaves.filter(l => l.data.seedRef === seed.id);
@@ -43,10 +46,10 @@ const seedCards = seeds.map((seed) => {
   
   <Sidebar />
 
-  <main class="flex-1 h-full flex flex-col relative z-10">
+  <main id="main-content" class="flex-1 h-full min-w-0 flex flex-col relative z-10">
     <TopNav />
     
-    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 pb-20 md:pb-8">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-20 md:pb-8">
       <div class="max-w-7xl mx-auto flex flex-col xl:flex-row gap-8 xl:gap-12">
         
         <!-- Main Content Area -->
@@ -58,7 +61,7 @@ const seedCards = seeds.map((seed) => {
             </div>
             
             <div class="flex gap-2">
-              <button id="filter-toggle" class="w-10 h-10 rounded-full bg-forest-text-light/5 dark:bg-white/5 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 flex items-center justify-center hover:bg-forest-text-light/10 dark:hover:bg-white/10 transition-colors">
+              <button id="filter-toggle" type="button" aria-label="Filtreleri göster veya gizle" aria-controls="filter-bar" aria-expanded="true" class="w-10 h-10 rounded-full bg-forest-text-light/5 dark:bg-white/5 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 flex items-center justify-center hover:bg-forest-text-light/10 dark:hover:bg-white/10 transition-colors">
                 <span class="text-forest-text-light dark:text-forest-text-dark">≡</span>
               </button>
             </div>
@@ -66,19 +69,19 @@ const seedCards = seeds.map((seed) => {
 
           <!-- Filters -->
           <div class="flex gap-2 mb-10 flex-wrap" id="filter-bar">
-            <button data-filter="all" class="filter-btn active px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light text-white dark:bg-forest-card-dark dark:text-forest-text-dark border border-forest-text-light dark:border-forest-accent-dark/20 hover:opacity-90 transition-all shadow-lg dark:shadow-forest-glow/10">
+            <button type="button" data-filter="all" aria-pressed="true" class="filter-btn active px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light text-white dark:bg-forest-card-dark dark:text-forest-text-dark border border-forest-text-light dark:border-forest-accent-dark/20 hover:opacity-90 transition-all shadow-lg dark:shadow-forest-glow/10">
               Tümü
             </button>
-            <button data-filter="seed" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
+            <button type="button" data-filter="seed" aria-pressed="false" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
               🌱 Tohum
             </button>
-            <button data-filter="seedling" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
+            <button type="button" data-filter="seedling" aria-pressed="false" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
               🌿 Fidan
             </button>
-            <button data-filter="sapling" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
+            <button type="button" data-filter="sapling" aria-pressed="false" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
               🌳 Genç Ağaç
             </button>
-            <button data-filter="tree" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
+            <button type="button" data-filter="tree" aria-pressed="false" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
               🌲 Kadim Ağaç
             </button>
           </div>
@@ -137,46 +140,47 @@ const seedCards = seeds.map((seed) => {
 </Base>
 
 <script>
-  // Filter functionality
+  const filterBar = document.getElementById('filter-bar');
+  const filterToggle = document.getElementById('filter-toggle');
+  const filterButtons = [...document.querySelectorAll<HTMLButtonElement>('.filter-btn')];
+
+  filterToggle?.addEventListener('click', () => {
+    const willHide = !filterBar?.classList.contains('hidden');
+    filterBar?.classList.toggle('hidden', willHide);
+    filterToggle.setAttribute('aria-expanded', String(!willHide));
+  });
+
+  const applyFilter = (filter: string) => {
+    filterButtons.forEach(button => {
+      const active = button.dataset.filter === filter;
+      button.classList.toggle('!bg-forest-text-light', active);
+      button.classList.toggle('!text-white', active);
+      button.classList.toggle('dark:!bg-forest-card-dark', active);
+      button.classList.toggle('dark:!text-forest-text-dark', active);
+      button.classList.toggle('shadow-lg', active);
+      button.classList.toggle('active', active);
+      button.classList.toggle('bg-forest-text-light/10', !active);
+      button.classList.toggle('dark:bg-white/5', !active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+
+    document.querySelectorAll<HTMLElement>('#seeds-grid > *').forEach(card => {
+      card.hidden = Boolean(card.dataset.stage) && filter !== 'all' && card.dataset.stage !== filter;
+    });
+  };
+
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const filter = (btn as HTMLElement).dataset.filter;
-      
-      // Update active button
-      document.querySelectorAll('.filter-btn').forEach(b => {
-        b.classList.remove('!bg-forest-text-light', '!text-white', 'dark:!bg-forest-card-dark', 'dark:!text-forest-text-dark', 'shadow-lg', 'active');
-        b.classList.add('bg-forest-text-light/10', 'dark:bg-white/5');
-      });
-      btn.classList.add('!bg-forest-text-light', '!text-white', 'dark:!bg-forest-card-dark', 'dark:!text-forest-text-dark', 'shadow-lg', 'active');
-      btn.classList.remove('bg-forest-text-light/10', 'dark:bg-white/5');
-      
-      // Filter cards
-      document.querySelectorAll('#seeds-grid > *').forEach(card => {
-        const el = card as HTMLElement;
-        if (filter === 'all' || el.dataset.stage === filter || !el.dataset.stage) {
-          el.style.display = '';
-        } else {
-          el.style.display = 'none';
-        }
-      });
+      const filter = (btn as HTMLElement).dataset.filter || 'all';
+      applyFilter(filter);
+      const url = new URL(window.location.href);
+      filter === 'all' ? url.searchParams.delete('stage') : url.searchParams.set('stage', filter);
+      history.replaceState({}, '', url);
     });
   });
 
-  // Client-side Thirsty check
-  const localWateringStr = localStorage.getItem('watered_seeds');
-  if (localWateringStr) {
-    try {
-      const wateredSeeds = JSON.parse(localWateringStr);
-      document.querySelectorAll('.thirsty-badge').forEach(badge => {
-        const seedId = (badge as HTMLElement).dataset.seed;
-        if (seedId && wateredSeeds[seedId]) {
-          const lastWatered = new Date(wateredSeeds[seedId]);
-          const days = Math.floor((new Date().getTime() - lastWatered.getTime()) / (1000 * 60 * 60 * 24));
-          if (days < 14) {
-            badge.remove(); // Remove thirsty badge if watered recently
-          }
-        }
-      });
-    } catch {}
-  }
+  const requestedStage = new URLSearchParams(window.location.search).get('stage');
+  const validStages = new Set(['seed', 'seedling', 'sapling', 'tree']);
+  applyFilter(requestedStage && validStages.has(requestedStage) ? requestedStage : 'all');
+
 </script>

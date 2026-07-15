@@ -1,0 +1,42 @@
+---
+import Base from '../../layouts/Base.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import TopNav from '../../components/TopNav.astro';
+import { getCollection, render } from 'astro:content';
+import { GARDENS } from '../../lib/gardens';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes');
+  return notes.map(note => ({ params: { slug: note.id }, props: { note } }));
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+const garden = GARDENS[note.data.garden];
+const formattedDate = new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(note.data.date);
+---
+
+<Base title={`${note.data.title} — Yaşayan Orman`} description={`${garden.label} bahçesinden: ${note.data.title}`}>
+  <Sidebar />
+  <main id="main-content" class="flex-1 h-full min-w-0 flex flex-col relative z-10">
+    <TopNav />
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-20">
+      <article class="max-w-3xl mx-auto">
+        <nav aria-label="İçerik yolu" class="flex flex-wrap items-center gap-2 text-sm text-forest-text-light/55 dark:text-forest-text-dark/55 mb-8">
+          <a href="/kulliyat" class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark">Külliyat</a><span aria-hidden="true">→</span><span>{garden.icon} {garden.label}</span>
+        </nav>
+        <header class="dashboard-card p-6 sm:p-8 mb-8">
+          <p class="text-xs font-bold uppercase tracking-[0.22em] text-forest-accent-light dark:text-forest-accent-dark mb-4">{garden.icon} {garden.label}</p>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark mb-4">{note.data.title}</h1>
+          <div class="flex flex-wrap items-center gap-3 text-xs text-forest-text-light/50 dark:text-forest-text-dark/50">
+            <time datetime={note.data.date.toISOString()}>{formattedDate}</time>
+            {note.data.mood && <span>· ruh hali: {note.data.mood}</span>}
+          </div>
+          {note.data.tags.length > 0 && <div class="flex flex-wrap gap-2 mt-5">{note.data.tags.map(tag => <span class="rounded-full bg-black/5 dark:bg-white/5 px-3 py-1 text-xs font-mono">#{tag}</span>)}</div>}
+        </header>
+        <div class="content-prose dashboard-card p-6 sm:p-8 md:p-10"><Content /></div>
+        <a href="/kulliyat" class="inline-flex items-center gap-2 mt-8 text-sm font-bold text-forest-accent-light dark:text-forest-accent-dark">← Külliyata dön</a>
+      </article>
+    </div>
+  </main>
+</Base>
