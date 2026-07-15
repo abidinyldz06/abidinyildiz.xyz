@@ -156,7 +156,7 @@ const oldestDays = oldestSeed ? daysSince(new Date(oldestSeed.data.plantedAt)) :
       const achievements = c.achievements || [];
       
       if (achievements.length > 0 && grid) {
-        achievements.forEach(id => {
+        achievements.forEach((id: string) => {
           const badge = ACHIEVEMENTS_DB[id];
           if (badge) {
             grid.innerHTML += `

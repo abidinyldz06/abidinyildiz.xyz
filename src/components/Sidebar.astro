@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { getStageInfo, needsWater } from '../lib/growth';
+import { getStageInfo } from '../lib/growth';
 
 const seeds = await getCollection('seeds');
 const leaves = await getCollection('leaves');

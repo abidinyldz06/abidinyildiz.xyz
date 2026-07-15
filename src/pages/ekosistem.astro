@@ -31,7 +31,7 @@ leaves.forEach(l => {
   });
 });
 
-const graphLinks = [];
+const graphLinks: Array<{ source: string; target: string }> = [];
 
 // Connect seeds to root
 seeds.forEach(s => {

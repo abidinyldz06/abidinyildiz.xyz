@@ -3,11 +3,10 @@ import Base from '../layouts/Base.astro';
 import Sidebar from '../components/Sidebar.astro';
 import TopNav from '../components/TopNav.astro';
 import RightPanel from '../components/RightPanel.astro';
-import NoteCard from '../components/NoteCard.astro';
 import PlantSeedCard from '../components/PlantSeedCard.astro';
 
 import { getCollection } from 'astro:content';
-import { getStageInfo, daysSince, formatTimeSince, needsWater } from '../lib/growth';
+import { getStageInfo, formatTimeSince, needsWater } from '../lib/growth';
 
 const seeds = await getCollection('seeds');
 const leaves = await getCollection('leaves');

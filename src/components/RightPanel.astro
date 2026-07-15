@@ -37,7 +37,6 @@ const recentLeaves = [...leaves]
         const lastDate = seedLeaves.length > 0
           ? new Date(Math.max(...seedLeaves.map(l => l.data.date.getTime())))
           : null;
-        const stageInfo = getStageInfo(new Date(seed.data.plantedAt));
         
         return (
           <a href={`/seeds/${seed.id}`} class="thirsty-rp-item flex gap-4 group block" data-seed={seed.id}>
@@ -104,7 +103,6 @@ const recentLeaves = [...leaves]
   if (localWateringStr) {
     try {
       const wateredSeeds = JSON.parse(localWateringStr);
-      let allWatered = true;
       document.querySelectorAll('.thirsty-rp-item').forEach(item => {
         const seedId = (item as HTMLElement).dataset.seed;
         if (seedId && wateredSeeds[seedId]) {
@@ -112,11 +110,7 @@ const recentLeaves = [...leaves]
           const days = Math.floor((new Date().getTime() - lastWatered.getTime()) / (1000 * 60 * 60 * 24));
           if (days < 14) {
             item.remove(); // Remove thirsty item if watered recently
-          } else {
-            allWatered = false;
           }
-        } else {
-          allWatered = false;
         }
       });
       

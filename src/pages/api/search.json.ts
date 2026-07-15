@@ -4,7 +4,7 @@ export async function GET() {
   const seeds = await getCollection('seeds');
   const leaves = await getCollection('leaves');
 
-  const searchData = [];
+  const searchData: Array<{ id: string, title: string, description: string, type: string, url: string, icon: string }> = [];
 
   // Add seeds
   seeds.forEach(seed => {
@@ -23,7 +23,7 @@ export async function GET() {
     searchData.push({
       id: leaf.id,
       title: leaf.data.title,
-      description: leaf.body, // Include body for content search
+      description: leaf.body || '', // Include body for content search
       type: 'Yaprak',
       url: `/leaves/${leaf.id}`,
       icon: '🍃'
