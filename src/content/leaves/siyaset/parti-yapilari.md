@@ -10,5 +10,5 @@ tags: [parti, yapı]
 Türkiye'deki siyasi partilerin iç yapılanmaları ve lider profilleri üzerine karşılaştırmalı notlar.
 
 ### Gözlemler
-- Parti içi demokrasi meselesi hâlâ gündemde
+- Parti içi demokrasi meselesi hâlâ gündemde. (Ayrıca bkz: [[siyaset/secim-analizi|Seçim Analizi]])
 - Yeni partilerin kurumsallaşma süreçleri

@@ -40,7 +40,7 @@ const recentLeaves = [...leaves]
         const stageInfo = getStageInfo(new Date(seed.data.plantedAt));
         
         return (
-          <a href={`/seeds/${seed.id}`} class="flex gap-4 group block">
+          <a href={`/seeds/${seed.id}`} class="thirsty-rp-item flex gap-4 group block" data-seed={seed.id}>
             <div class="w-10 h-10 rounded-full bg-red-900/10 dark:bg-red-900/30 flex items-center justify-center shrink-0 text-lg group-hover:scale-110 transition-transform">
               {seed.data.icon}
             </div>
@@ -55,7 +55,12 @@ const recentLeaves = [...leaves]
       })}
       
       {thirstySeeds.length === 0 && (
-        <p class="text-sm text-forest-accent-light dark:text-forest-accent-dark font-medium text-center py-2">
+        <p id="all-healthy-msg" class="text-sm text-forest-accent-light dark:text-forest-accent-dark font-medium text-center py-2">
+          ✅ Tüm ağaçlar sağlıklı!
+        </p>
+      )}
+      {thirstySeeds.length > 0 && (
+        <p id="all-healthy-msg" class="text-sm text-forest-accent-light dark:text-forest-accent-dark font-medium text-center py-2 hidden">
           ✅ Tüm ağaçlar sağlıklı!
         </p>
       )}
@@ -92,3 +97,36 @@ const recentLeaves = [...leaves]
   </div>
 
 </aside>
+
+<script>
+  // RightPanel Thirsty check
+  const localWateringStr = localStorage.getItem('watered_seeds');
+  if (localWateringStr) {
+    try {
+      const wateredSeeds = JSON.parse(localWateringStr);
+      let allWatered = true;
+      document.querySelectorAll('.thirsty-rp-item').forEach(item => {
+        const seedId = (item as HTMLElement).dataset.seed;
+        if (seedId && wateredSeeds[seedId]) {
+          const lastWatered = new Date(wateredSeeds[seedId]);
+          const days = Math.floor((new Date().getTime() - lastWatered.getTime()) / (1000 * 60 * 60 * 24));
+          if (days < 14) {
+            item.remove(); // Remove thirsty item if watered recently
+          } else {
+            allWatered = false;
+          }
+        } else {
+          allWatered = false;
+        }
+      });
+      
+      const thirstyContainer = document.getElementById('thirsty-container');
+      const allHealthyMsg = document.getElementById('all-healthy-msg');
+      if (thirstyContainer && allHealthyMsg) {
+         if (document.querySelectorAll('.thirsty-rp-item').length === 0) {
+            allHealthyMsg.classList.remove('hidden');
+         }
+      }
+    } catch {}
+  }
+</script>

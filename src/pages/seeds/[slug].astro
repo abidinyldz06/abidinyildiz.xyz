@@ -80,23 +80,31 @@ const daysAlive = daysSince(plantedAt);
                   <div class="text-2xl font-bold text-forest-accent-light dark:text-forest-accent-dark">{growthPercent}%</div>
                   <div class="text-[10px] uppercase tracking-widest text-forest-text-light/50 dark:text-forest-text-dark/50 font-bold">Büyüme</div>
                 </div>
-                <div class={`bg-black/5 dark:bg-black/20 rounded-xl p-3 ${isThirsty ? 'ring-1 ring-red-400/50' : ''}`}>
-                  <div class="text-2xl font-bold">{isThirsty ? '🥀' : '💧'}</div>
-                  <div class="text-[10px] uppercase tracking-widest text-forest-text-light/50 dark:text-forest-text-dark/50 font-bold">{isThirsty ? 'Susuz' : 'Sağlıklı'}</div>
+                <div id="thirsty-status" class={`bg-black/5 dark:bg-black/20 rounded-xl p-3 ${isThirsty ? 'ring-1 ring-red-400/50' : ''}`}>
+                  <div class="text-2xl font-bold" id="thirsty-icon">{isThirsty ? '🥀' : '💧'}</div>
+                  <div class="text-[10px] uppercase tracking-widest text-forest-text-light/50 dark:text-forest-text-dark/50 font-bold" id="thirsty-label">{isThirsty ? 'Susuz' : 'Sağlıklı'}</div>
                 </div>
               </div>
               
-              <!-- Growth Bar -->
-              <div class="mt-6">
-                <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-forest-text-light/40 dark:text-forest-text-dark/40 mb-2">
-                  <span>🌱 Tohum</span>
-                  <span>🌿 Fidan</span>
-                  <span>🌳 Genç Ağaç</span>
-                  <span>🌲 Kadim</span>
+              <!-- Growth Bar & Watering -->
+              <div class="mt-6 flex flex-col md:flex-row gap-4 items-end">
+                <div class="flex-1 w-full">
+                  <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-forest-text-light/40 dark:text-forest-text-dark/40 mb-2">
+                    <span>🌱 Tohum</span>
+                    <span>🌿 Fidan</span>
+                    <span>🌳 Genç Ağaç</span>
+                    <span>🌲 Kadim</span>
+                  </div>
+                  <div class="w-full bg-black/10 dark:bg-black/30 rounded-full h-2.5 overflow-hidden">
+                    <div class="bg-gradient-to-r from-emerald-400 via-green-500 to-forest-accent-dark h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(74,222,128,0.5)]" style={`width: ${growthPercent}%`}></div>
+                  </div>
                 </div>
-                <div class="w-full bg-black/10 dark:bg-black/30 rounded-full h-2.5 overflow-hidden">
-                  <div class="bg-gradient-to-r from-emerald-400 via-green-500 to-forest-accent-dark h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(74,222,128,0.5)]" style={`width: ${growthPercent}%`}></div>
-                </div>
+                
+                <button id="water-btn" data-seed={seed.id} class="px-6 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 rounded-xl font-bold transition-all flex items-center gap-2 group relative overflow-hidden shrink-0">
+                  <span class="absolute inset-0 bg-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  <span class="text-xl group-hover:-translate-y-1 group-active:translate-y-0 transition-transform">💧</span> 
+                  <span>Sula</span>
+                </button>
               </div>
             </div>
           </div>
@@ -155,3 +163,83 @@ const daysAlive = daysSince(plantedAt);
   </main>
   
 </Base>
+
+<script>
+  import { unlockAchievement } from '../../lib/caretaker';
+
+  const waterBtn = document.getElementById('water-btn');
+  const statusBox = document.getElementById('thirsty-status');
+  const statusIcon = document.getElementById('thirsty-icon');
+  const statusLabel = document.getElementById('thirsty-label');
+
+  if (waterBtn) {
+    const seedId = waterBtn.dataset.seed;
+    
+    // Check local storage for recent watering
+    const localWateringStr = localStorage.getItem('watered_seeds');
+    if (localWateringStr && seedId) {
+      try {
+        const wateredSeeds = JSON.parse(localWateringStr);
+        if (wateredSeeds[seedId]) {
+          const lastWatered = new Date(wateredSeeds[seedId]);
+          const days = Math.floor((new Date().getTime() - lastWatered.getTime()) / (1000 * 60 * 60 * 24));
+          if (days < 14) {
+            // Already healthy
+            if (statusBox) statusBox.className = 'bg-black/5 dark:bg-black/20 rounded-xl p-3';
+            if (statusIcon) statusIcon.textContent = '💧';
+            if (statusLabel) statusLabel.textContent = 'Sağlıklı';
+          }
+        }
+      } catch {}
+    }
+
+    waterBtn.addEventListener('click', () => {
+      // Play animation
+      waterBtn.classList.add('scale-95', 'opacity-80');
+      setTimeout(() => waterBtn.classList.remove('scale-95', 'opacity-80'), 150);
+
+      // Create particle effect
+      const rect = waterBtn.getBoundingClientRect();
+      for(let i=0; i<5; i++) {
+        const particle = document.createElement('div');
+        particle.textContent = '💧';
+        particle.className = 'absolute text-lg pointer-events-none transition-all duration-1000 ease-out z-50';
+        particle.style.left = `${rect.left + rect.width / 2}px`;
+        particle.style.top = `${rect.top}px`;
+        document.body.appendChild(particle);
+        
+        setTimeout(() => {
+          particle.style.transform = `translate(${(Math.random() - 0.5) * 100}px, -${Math.random() * 100 + 50}px) scale(0)`;
+          particle.style.opacity = '0';
+        }, 50);
+        
+        setTimeout(() => particle.remove(), 1000);
+      }
+
+      // Update UI
+      if (statusBox) statusBox.className = 'bg-black/5 dark:bg-black/20 rounded-xl p-3 ring-2 ring-blue-400/50 shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-all';
+      if (statusIcon) statusIcon.textContent = '💧';
+      if (statusLabel) statusLabel.textContent = 'Can Suyu Verildi';
+
+      // Save to localStorage
+      if (seedId) {
+        const wateredStr = localStorage.getItem('watered_seeds') || '{}';
+        try {
+          const watered = JSON.parse(wateredStr);
+          watered[seedId] = new Date().toISOString();
+          localStorage.setItem('watered_seeds', JSON.stringify(watered));
+        } catch {}
+      }
+
+      // Achievement check
+      const caretakerStr = localStorage.getItem('caretaker');
+      if (caretakerStr) {
+        try {
+          let caretaker = JSON.parse(caretakerStr);
+          caretaker = unlockAchievement(caretaker, 'water_drop');
+          localStorage.setItem('caretaker', JSON.stringify(caretaker));
+        } catch {}
+      }
+    });
+  }
+</script>

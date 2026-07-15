@@ -96,7 +96,7 @@ const seedCards = seeds.map((seed) => {
                   
                   <div class="flex items-center gap-2">
                     {seed.needsWater && (
-                      <span class="text-xs px-2 py-0.5 rounded-md bg-red-500/10 text-red-500 dark:text-red-400 font-bold">💧 Sulanmalı</span>
+                      <span class="thirsty-badge text-xs px-2 py-0.5 rounded-md bg-red-500/10 text-red-500 dark:text-red-400 font-bold" data-seed={seed.slug}>💧 Sulanmalı</span>
                     )}
                     <span class={`text-xs font-bold px-3 py-1 rounded-md ${seed.stage.color}`}>
                       {seed.stage.icon} {seed.stage.label}
@@ -162,4 +162,22 @@ const seedCards = seeds.map((seed) => {
       });
     });
   });
+
+  // Client-side Thirsty check
+  const localWateringStr = localStorage.getItem('watered_seeds');
+  if (localWateringStr) {
+    try {
+      const wateredSeeds = JSON.parse(localWateringStr);
+      document.querySelectorAll('.thirsty-badge').forEach(badge => {
+        const seedId = (badge as HTMLElement).dataset.seed;
+        if (seedId && wateredSeeds[seedId]) {
+          const lastWatered = new Date(wateredSeeds[seedId]);
+          const days = Math.floor((new Date().getTime() - lastWatered.getTime()) / (1000 * 60 * 60 * 24));
+          if (days < 14) {
+            badge.remove(); // Remove thirsty badge if watered recently
+          }
+        }
+      });
+    } catch {}
+  }
 </script>

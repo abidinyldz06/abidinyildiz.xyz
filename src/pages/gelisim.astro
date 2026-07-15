@@ -73,7 +73,7 @@ const oldestDays = oldestSeed ? daysSince(new Date(oldestSeed.data.plantedAt)) :
           </div>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-8">
+        <div class="grid md:grid-cols-2 gap-8 mb-8">
           <!-- Yaş Dağılımı -->
           <div class="dashboard-card p-8">
             <h3 class="font-serif text-xl font-bold text-forest-text-light dark:text-forest-text-dark mb-6">Ağaçların Evreleri</h3>
@@ -123,12 +123,23 @@ const oldestDays = oldestSeed ? daysSince(new Date(oldestSeed.data.plantedAt)) :
           </div>
         </div>
 
+        <!-- Rozetler -->
+        <div class="dashboard-card p-8">
+          <h3 class="font-serif text-xl font-bold text-forest-text-light dark:text-forest-text-dark mb-6">Kazanılan Rozetler</h3>
+          <div id="achievements-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <!-- Rozetler buraya js ile eklenecek -->
+          </div>
+          <p id="no-achievements" class="text-sm text-forest-text-light/50 dark:text-forest-text-dark/50 italic hidden">Henüz rozet kazanılmadı.</p>
+        </div>
+
       </div>
     </div>
   </main>
 </Base>
 
 <script>
+  import { ACHIEVEMENTS_DB } from '../lib/caretaker';
+
   const data = localStorage.getItem('caretaker');
   if (data) {
     try {
@@ -138,6 +149,29 @@ const oldestDays = oldestSeed ? daysSince(new Date(oldestSeed.data.plantedAt)) :
       (document.getElementById('stats-title') as HTMLElement).textContent = c.title;
       (document.getElementById('stats-xp-bar') as HTMLElement).style.width = `${(c.xp / c.xpToNext) * 100}%`;
       (document.getElementById('stats-xp-text') as HTMLElement).textContent = `Seviye ${c.level} (${c.xp}/${c.xpToNext} XP)`;
+
+      // Rozetler
+      const grid = document.getElementById('achievements-grid');
+      const emptyMsg = document.getElementById('no-achievements');
+      const achievements = c.achievements || [];
+      
+      if (achievements.length > 0 && grid) {
+        achievements.forEach(id => {
+          const badge = ACHIEVEMENTS_DB[id];
+          if (badge) {
+            grid.innerHTML += `
+              <div class="p-4 rounded-xl bg-forest-accent-light/5 dark:bg-forest-accent-dark/5 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-center flex flex-col items-center gap-2 group">
+                <span class="text-4xl group-hover:scale-110 group-hover:rotate-12 transition-transform">${badge.icon}</span>
+                <span class="font-bold text-sm text-forest-text-light dark:text-forest-text-dark">${badge.title}</span>
+                <span class="text-[10px] text-forest-text-light/60 dark:text-forest-text-dark/60 leading-tight">${badge.description}</span>
+              </div>
+            `;
+          }
+        });
+      } else {
+        emptyMsg?.classList.remove('hidden');
+      }
+
     } catch {}
   }
 </script>

@@ -9,26 +9,45 @@ const seeds = await getCollection('seeds');
 const leaves = await getCollection('leaves');
 
 // Prepare graph data
-const graphNodes = seeds.map(s => ({
-  id: s.id,
-  label: `${s.data.icon} ${s.data.title}`,
-  group: 1, // seed
-  val: leaves.filter(l => l.data.seedRef === s.id).length * 2 + 5 // size
-}));
+const graphNodes = [
+  { id: 'root', label: '🌲 Yaşayan Orman (Öz)', group: 0, val: 20 }
+];
+
+seeds.forEach(s => {
+  graphNodes.push({
+    id: s.id,
+    label: `${s.data.icon} ${s.data.title}`,
+    group: 1, // seed
+    val: leaves.filter(l => l.data.seedRef === s.id).length * 2 + 10 // size
+  });
+});
 
 leaves.forEach(l => {
   graphNodes.push({
     id: l.id,
     label: l.data.title,
     group: 2, // leaf
-    val: 2 // size
+    val: 4 // size
   });
 });
 
-const graphLinks = leaves.map(l => ({
-  source: l.id,
-  target: l.data.seedRef
-}));
+const graphLinks = [];
+
+// Connect seeds to root
+seeds.forEach(s => {
+  graphLinks.push({
+    source: 'root',
+    target: s.id
+  });
+});
+
+// Connect leaves to seeds
+leaves.forEach(l => {
+  graphLinks.push({
+    source: l.data.seedRef,
+    target: l.id
+  });
+});
 
 const graphData = {
   nodes: graphNodes,
@@ -75,14 +94,23 @@ const graphData = {
       const Graph = ForceGraph()(container)
         .graphData(graphData)
         .nodeLabel('label')
-        .nodeColor(node => node.group === 1 ? (isDark ? '#4ade80' : '#6ba887') : (isDark ? '#e0eee6' : '#2d4a3e'))
+        .nodeColor(node => {
+          if (node.group === 0) return isDark ? '#fbbf24' : '#d97706'; // Root color (amber/gold)
+          if (node.group === 1) return isDark ? '#4ade80' : '#6ba887'; // Seed color
+          return isDark ? '#e0eee6' : '#2d4a3e'; // Leaf color
+        })
         .linkColor(() => isDark ? 'rgba(74,222,128,0.2)' : 'rgba(107,168,135,0.2)')
         .backgroundColor('transparent')
         .nodeVal('val')
+        .dagMode('td') // Top-Down Tree Layout
+        .dagLevelDistance(60) // Distance between levels
+        .linkDirectionalParticles(2)
+        .linkDirectionalParticleSpeed(d => d.value * 0.001 || 0.005)
+        .linkDirectionalParticleWidth(2)
         .onNodeClick(node => {
           if (node.group === 1) {
             window.location.href = `/seeds/${node.id}`;
-          } else {
+          } else if (node.group === 2) {
             window.location.href = `/leaves/${node.id}`;
           }
         });
