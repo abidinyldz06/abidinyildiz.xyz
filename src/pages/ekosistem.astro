@@ -3,64 +3,411 @@ import Base from '../layouts/Base.astro';
 import Sidebar from '../components/Sidebar.astro';
 import TopNav from '../components/TopNav.astro';
 import { getCollection } from 'astro:content';
+import { GARDENS } from '../lib/gardens';
 
 const seeds = await getCollection('seeds');
 const leaves = await getCollection('leaves');
-const branches = seeds.map(seed => ({
-  seed,
-  leaves: leaves
-    .filter(leaf => leaf.data.seedRef === seed.id)
-    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime()),
-})).sort((a, b) => b.leaves.length - a.leaves.length);
+const notes = await getCollection('notes');
+
+const nodes = [
+  { id: 'root', label: 'Yaşayan Orman', icon: '🌲', type: 'root', url: '/', size: 18 },
+  ...seeds.map(seed => ({
+    id: `seed:${seed.id}`,
+    label: seed.data.title,
+    icon: seed.data.icon,
+    type: 'seed',
+    url: `/seeds/${seed.id}`,
+    size: 12 + leaves.filter(leaf => leaf.data.seedRef === seed.id).length * 2,
+  })),
+  ...Object.entries(GARDENS).map(([id, garden]) => ({
+    id: `garden:${id}`,
+    label: garden.label,
+    icon: garden.icon,
+    type: 'garden',
+    url: `/kulliyat?garden=${id}`,
+    size: 10 + notes.filter(note => note.data.garden === id).length,
+  })),
+  ...leaves.map(leaf => ({
+    id: `leaf:${leaf.id}`,
+    label: leaf.data.title,
+    icon: '🍃',
+    type: 'leaf',
+    url: `/leaves/${leaf.id}`,
+    size: 7,
+    tags: leaf.data.tags,
+  })),
+  ...notes.map(note => ({
+    id: `note:${note.id}`,
+    label: note.data.title,
+    icon: GARDENS[note.data.garden].icon,
+    type: 'note',
+    url: `/notlar/${note.id}`,
+    size: 7,
+    tags: note.data.tags,
+  })),
+];
+
+const links = [
+  ...seeds.map(seed => ({ source: 'root', target: `seed:${seed.id}`, type: 'branch' })),
+  ...Object.keys(GARDENS).map(id => ({ source: 'root', target: `garden:${id}`, type: 'branch' })),
+  ...leaves.map(leaf => ({ source: `seed:${leaf.data.seedRef}`, target: `leaf:${leaf.id}`, type: 'branch' })),
+  ...notes.map(note => ({ source: `garden:${note.data.garden}`, target: `note:${note.id}`, type: 'branch' })),
+];
+
+const taggedNodes = [
+  ...leaves.map(leaf => ({ id: `leaf:${leaf.id}`, tags: leaf.data.tags })),
+  ...notes.map(note => ({ id: `note:${note.id}`, tags: note.data.tags })),
+];
+const tagGroups = new Map<string, string[]>();
+for (const node of taggedNodes) {
+  for (const tag of node.tags) {
+    const key = tag.toLocaleLowerCase('tr-TR');
+    tagGroups.set(key, [...(tagGroups.get(key) || []), node.id]);
+  }
+}
+for (const ids of tagGroups.values()) {
+  if (ids.length < 2) continue;
+  for (let index = 1; index < ids.length; index += 1) {
+    if (ids[0] !== ids[index]) links.push({ source: ids[0], target: ids[index], type: 'tag' });
+  }
+}
+
+const graphData = { nodes, links };
 ---
 
-<Base title="Ekosistem — Yaşayan Orman" description="Yaşayan Orman’daki fikirlerin ve yazıların bağlantı haritası.">
+<Base title="Ekosistem — Yaşayan Orman" description="Yaşayan Orman’daki fikirlerin, notların ve yazıların etkileşimli bağlantı haritası.">
   <Sidebar />
   <main id="main-content" class="flex-1 h-full min-w-0 flex flex-col relative z-10">
     <TopNav />
-    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-20">
-      <div class="max-w-6xl mx-auto">
-        <div class="mb-10">
-          <p class="text-xs font-bold uppercase tracking-[0.25em] text-forest-accent-light dark:text-forest-accent-dark mb-3">Bağlantı haritası</p>
-          <h1 class="text-4xl md:text-5xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark mb-3">Orman Ekosistemi</h1>
-          <p class="max-w-2xl text-forest-text-light/60 dark:text-forest-text-dark/60">Her ağaç bir ana konuyu, dallarındaki yapraklar ise o konuyu büyüten yazıları gösterir. Haritadaki her öğe gerçek bir sayfaya açılır.</p>
-        </div>
+    <div class="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 lg:p-8">
+      <div class="max-w-[1500px] mx-auto h-full min-h-[680px] flex flex-col">
+        <header class="flex flex-col lg:flex-row lg:items-end justify-between gap-5 mb-5">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-forest-accent-light dark:text-forest-accent-dark mb-2">Canlı bağlantı haritası</p>
+            <h1 class="text-3xl sm:text-4xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark">Orman Ekosistemi</h1>
+            <p class="max-w-2xl mt-2 text-sm sm:text-base text-forest-text-light/60 dark:text-forest-text-dark/60">Düğümleri sürükle, boş alanda haritayı taşı, tekerlekle yakınlaş. Bir düğüme tıklayınca ilgili içeriğe gidersin.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-semibold text-forest-text-light/55 dark:text-forest-text-dark/55" aria-label="Harita açıklaması">
+            <span><i class="legend-dot bg-amber-400"></i> Kök</span>
+            <span><i class="legend-dot bg-emerald-500"></i> Ağaç</span>
+            <span><i class="legend-dot bg-sky-400"></i> Bahçe</span>
+            <span><i class="legend-dot bg-lime-300"></i> İçerik</span>
+          </div>
+        </header>
 
-        <section aria-label="Orman özeti" class="relative dashboard-card p-6 sm:p-8 mb-8 overflow-hidden">
-          <div class="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-forest-accent-light to-emerald-300 dark:from-forest-accent-dark dark:to-emerald-700"></div>
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div class="flex items-center gap-5">
-              <span class="w-16 h-16 rounded-2xl bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 flex items-center justify-center text-3xl" aria-hidden="true">🌲</span>
-              <div><h2 class="text-2xl font-serif font-bold text-forest-text-light dark:text-forest-text-dark">Yaşayan Orman</h2><p class="text-sm text-forest-text-light/55 dark:text-forest-text-dark/55 mt-1">Fikirlerden yazılara uzanan kişisel bilgi ağı</p></div>
+        <section class="dashboard-card relative flex-1 min-h-[560px] overflow-hidden" aria-label="Etkileşimli bilgi grafiği">
+          <canvas id="ecosystem-canvas" class="absolute inset-0 w-full h-full cursor-grab active:cursor-grabbing touch-none" aria-hidden="true"></canvas>
+          <div class="absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-3 p-3 sm:p-4 pointer-events-none">
+            <label class="pointer-events-auto relative block w-full max-w-xs">
+              <span class="sr-only">Haritada ara</span>
+              <span aria-hidden="true" class="absolute left-3 top-1/2 -translate-y-1/2 opacity-50">⌕</span>
+              <input id="graph-search" type="search" placeholder="Haritada ara…" class="w-full rounded-xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 bg-white/85 dark:bg-[#101a14]/90 backdrop-blur px-9 py-2.5 text-sm outline-none focus:ring-2 focus:ring-forest-accent-light/40 dark:focus:ring-forest-accent-dark/40" />
+            </label>
+            <div class="pointer-events-auto flex rounded-xl overflow-hidden border border-forest-accent-light/20 dark:border-forest-accent-dark/20 bg-white/85 dark:bg-[#101a14]/90 backdrop-blur shadow-sm">
+              <button id="zoom-out" type="button" aria-label="Uzaklaştır" class="graph-control">−</button>
+              <button id="reset-view" type="button" aria-label="Görünümü sıfırla" class="graph-control border-x border-forest-accent-light/15 dark:border-forest-accent-dark/15">◎</button>
+              <button id="zoom-in" type="button" aria-label="Yakınlaştır" class="graph-control">+</button>
             </div>
-            <dl class="flex gap-6 text-center">
-              <div><dt class="text-xs uppercase tracking-widest text-forest-text-light/45 dark:text-forest-text-dark/45">Ağaç</dt><dd class="text-2xl font-black mt-1">{seeds.length}</dd></div>
-              <div><dt class="text-xs uppercase tracking-widest text-forest-text-light/45 dark:text-forest-text-dark/45">Yaprak</dt><dd class="text-2xl font-black mt-1">{leaves.length}</dd></div>
-            </dl>
+          </div>
+          <div id="graph-tooltip" role="status" class="absolute z-20 hidden pointer-events-none rounded-xl bg-[#0d1711]/95 text-white px-3 py-2 shadow-xl border border-white/10 max-w-64">
+            <strong id="tooltip-title" class="block text-sm"></strong>
+            <span id="tooltip-hint" class="block mt-0.5 text-[11px] text-white/55">Açmak için tıkla</span>
+          </div>
+          <div class="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 rounded-lg bg-white/70 dark:bg-[#101a14]/75 backdrop-blur px-3 py-2 text-[11px] text-forest-text-light/55 dark:text-forest-text-dark/55 pointer-events-none">
+            {nodes.length} düğüm · {links.length} bağlantı
           </div>
         </section>
 
-        <div class="grid lg:grid-cols-2 gap-6">
-          {branches.map(({ seed, leaves: seedLeaves }) => (
-            <section class="dashboard-card p-6 sm:p-7 relative">
-              <div class="absolute left-0 top-10 bottom-10 w-px bg-forest-accent-light/20 dark:bg-forest-accent-dark/20"></div>
-              <a href={`/seeds/${seed.id}`} class="group flex items-start gap-4 mb-6">
-                <span class="w-14 h-14 shrink-0 rounded-2xl bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">{seed.data.icon}</span>
-                <span class="min-w-0">
-                  <span class="text-xs uppercase tracking-widest font-bold text-forest-accent-light dark:text-forest-accent-dark">{seedLeaves.length} yaprak</span>
-                  <strong class="block text-xl font-serif text-forest-text-light dark:text-forest-text-dark group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark mt-1">{seed.data.title}</strong>
-                  <span class="block text-sm text-forest-text-light/55 dark:text-forest-text-dark/55 mt-2">{seed.data.description}</span>
-                </span>
+        <details class="dashboard-card mt-4 p-4">
+          <summary class="cursor-pointer font-bold text-sm text-forest-text-light dark:text-forest-text-dark">Haritadaki bağlantıları liste olarak aç</summary>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 mt-4">
+            {nodes.filter(node => node.url !== '/').map(node => (
+              <a href={node.url} class="rounded-lg px-3 py-2 text-sm hover:bg-forest-accent-light/10 dark:hover:bg-forest-accent-dark/10 transition-colors">
+                <span aria-hidden="true">{node.icon}</span> {node.label}
               </a>
-              {seedLeaves.length > 0 ? <div class="space-y-2 pl-5 border-l border-forest-accent-light/15 dark:border-forest-accent-dark/15 ml-7">
-                {seedLeaves.map(leaf => <a href={`/leaves/${leaf.id}`} class="flex items-center justify-between gap-4 rounded-xl px-4 py-3 bg-black/[0.025] dark:bg-white/[0.025] hover:bg-forest-accent-light/10 dark:hover:bg-forest-accent-dark/10 transition-colors">
-                  <span class="text-sm font-medium text-forest-text-light/80 dark:text-forest-text-dark/80"><span aria-hidden="true">🍃</span> {leaf.data.title}</span><span aria-hidden="true" class="opacity-30">→</span>
-                </a>)}
-              </div> : <p class="pl-5 ml-7 text-sm text-forest-text-light/40 dark:text-forest-text-dark/40">Bu dal henüz ilk yaprağını bekliyor.</p>}
-            </section>
-          ))}
-        </div>
+            ))}
+          </div>
+        </details>
       </div>
     </div>
   </main>
 </Base>
+
+<style>
+  .legend-dot { display: inline-block; width: .6rem; height: .6rem; border-radius: 999px; margin-right: .3rem; box-shadow: 0 0 10px currentColor; }
+  .graph-control { width: 2.65rem; height: 2.65rem; font-size: 1.25rem; font-weight: 800; transition: background-color .2s ease; }
+  .graph-control:hover { background: rgb(107 168 135 / .14); }
+</style>
+
+<script is:inline define:vars={{ graphData }}>
+  const canvas = document.getElementById('ecosystem-canvas');
+  const container = canvas?.parentElement;
+  const context = canvas?.getContext('2d');
+  const tooltip = document.getElementById('graph-tooltip');
+  const tooltipTitle = document.getElementById('tooltip-title');
+  const searchInput = document.getElementById('graph-search');
+  const nodes = graphData.nodes.map((node, index) => {
+    const angle = (index / Math.max(graphData.nodes.length - 1, 1)) * Math.PI * 2;
+    const radius = node.type === 'root' ? 0 : node.type === 'seed' || node.type === 'garden' ? 180 : 320;
+    return { ...node, x: Math.cos(angle) * radius, y: Math.sin(angle) * radius, vx: 0, vy: 0 };
+  });
+  const nodeById = new Map(nodes.map(node => [node.id, node]));
+  const links = graphData.links
+    .map(link => ({ ...link, sourceNode: nodeById.get(link.source), targetNode: nodeById.get(link.target) }))
+    .filter(link => link.sourceNode && link.targetNode);
+  const neighbors = new Map(nodes.map(node => [node.id, new Set()]));
+  links.forEach(link => {
+    neighbors.get(link.source)?.add(link.target);
+    neighbors.get(link.target)?.add(link.source);
+  });
+
+  let width = 0;
+  let height = 0;
+  let hovered = null;
+  let dragged = null;
+  let panning = false;
+  let pointerStart = null;
+  let searchTerm = '';
+  let view = { x: 0, y: 0, scale: 1 };
+  let simulationFrames = 0;
+
+  const palette = {
+    root: '#fbbf24',
+    seed: '#34d399',
+    garden: '#38bdf8',
+    leaf: '#bef264',
+    note: '#a7f3d0',
+  };
+
+  const resize = () => {
+    if (!canvas || !container || !context) return;
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = container.getBoundingClientRect();
+    width = rect.width;
+    height = rect.height;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    draw();
+  };
+
+  const worldToScreen = node => ({
+    x: width / 2 + view.x + node.x * view.scale,
+    y: height / 2 + view.y + node.y * view.scale,
+  });
+
+  const screenToWorld = (x, y) => ({
+    x: (x - width / 2 - view.x) / view.scale,
+    y: (y - height / 2 - view.y) / view.scale,
+  });
+
+  const nodeAt = (x, y) => {
+    for (let index = nodes.length - 1; index >= 0; index -= 1) {
+      const node = nodes[index];
+      const screen = worldToScreen(node);
+      const radius = Math.max(node.size * view.scale, 8);
+      if (Math.hypot(x - screen.x, y - screen.y) <= radius + 5) return node;
+    }
+    return null;
+  };
+
+  const simulate = () => {
+    if (simulationFrames > 420) return;
+    for (let a = 0; a < nodes.length; a += 1) {
+      const first = nodes[a];
+      for (let b = a + 1; b < nodes.length; b += 1) {
+        const second = nodes[b];
+        const dx = second.x - first.x || .1;
+        const dy = second.y - first.y || .1;
+        const distanceSquared = Math.max(dx * dx + dy * dy, 150);
+        const distance = Math.sqrt(distanceSquared);
+        const force = 950 / distanceSquared;
+        const fx = dx / distance * force;
+        const fy = dy / distance * force;
+        if (first.id !== 'root' && first !== dragged) { first.vx -= fx; first.vy -= fy; }
+        if (second.id !== 'root' && second !== dragged) { second.vx += fx; second.vy += fy; }
+      }
+    }
+    links.forEach(link => {
+      const dx = link.targetNode.x - link.sourceNode.x;
+      const dy = link.targetNode.y - link.sourceNode.y;
+      const distance = Math.max(Math.hypot(dx, dy), 1);
+      const target = link.type === 'tag' ? 180 : link.source === 'root' ? 220 : 125;
+      const force = (distance - target) * (link.type === 'tag' ? .0008 : .0025);
+      const fx = dx / distance * force;
+      const fy = dy / distance * force;
+      if (link.sourceNode.id !== 'root' && link.sourceNode !== dragged) { link.sourceNode.vx += fx; link.sourceNode.vy += fy; }
+      if (link.targetNode.id !== 'root' && link.targetNode !== dragged) { link.targetNode.vx -= fx; link.targetNode.vy -= fy; }
+    });
+    nodes.forEach(node => {
+      if (node.id === 'root' || node === dragged) return;
+      node.vx += -node.x * .000025;
+      node.vy += -node.y * .000025;
+      node.vx *= .9;
+      node.vy *= .9;
+      node.x += node.vx;
+      node.y += node.vy;
+    });
+    simulationFrames += 1;
+  };
+
+  const draw = () => {
+    if (!context) return;
+    context.clearRect(0, 0, width, height);
+    const dark = document.documentElement.classList.contains('dark');
+    const activeIds = hovered ? new Set([hovered.id, ...(neighbors.get(hovered.id) || [])]) : null;
+
+    links.forEach(link => {
+      const source = worldToScreen(link.sourceNode);
+      const target = worldToScreen(link.targetNode);
+      const active = !hovered || link.source === hovered.id || link.target === hovered.id;
+      context.beginPath();
+      context.moveTo(source.x, source.y);
+      context.lineTo(target.x, target.y);
+      context.setLineDash(link.type === 'tag' ? [4, 5] : []);
+      context.strokeStyle = link.type === 'tag'
+        ? `rgba(56, 189, 248, ${active ? .5 : .08})`
+        : dark ? `rgba(74, 222, 128, ${active ? .42 : .1})` : `rgba(45, 106, 74, ${active ? .38 : .1})`;
+      context.lineWidth = active ? 1.5 : 1;
+      context.stroke();
+    });
+    context.setLineDash([]);
+
+    nodes.forEach(node => {
+      const screen = worldToScreen(node);
+      const dimmed = activeIds && !activeIds.has(node.id);
+      const matches = searchTerm && node.label.toLocaleLowerCase('tr-TR').includes(searchTerm);
+      const radius = Math.max(node.size * view.scale, 5);
+      context.save();
+      context.globalAlpha = dimmed ? .18 : 1;
+      context.shadowColor = palette[node.type];
+      context.shadowBlur = node === hovered || matches ? 22 : node.type === 'root' ? 14 : 7;
+      context.beginPath();
+      context.arc(screen.x, screen.y, radius + (matches ? 4 : 0), 0, Math.PI * 2);
+      context.fillStyle = palette[node.type];
+      context.fill();
+      if (node === hovered || matches) {
+        context.lineWidth = 2;
+        context.strokeStyle = dark ? '#ffffff' : '#163b28';
+        context.stroke();
+      }
+      context.restore();
+
+      const showLabel = node.type === 'root' || node.type === 'seed' || node.type === 'garden' || node === hovered || matches || view.scale > 1.25;
+      if (showLabel && !dimmed) {
+        context.font = `${node.type === 'root' ? 700 : 600} ${node.type === 'root' ? 15 : 12}px Inter, sans-serif`;
+        context.textAlign = 'center';
+        context.textBaseline = 'top';
+        context.fillStyle = dark ? 'rgba(224,238,230,.92)' : 'rgba(35,58,48,.92)';
+        context.fillText(node.label, screen.x, screen.y + radius + 7);
+      }
+    });
+  };
+
+  const tick = () => {
+    simulate();
+    draw();
+    requestAnimationFrame(tick);
+  };
+
+  const pointerPosition = event => {
+    const rect = canvas.getBoundingClientRect();
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  };
+
+  canvas?.addEventListener('pointerdown', event => {
+    const point = pointerPosition(event);
+    dragged = nodeAt(point.x, point.y);
+    panning = !dragged;
+    pointerStart = { ...point, viewX: view.x, viewY: view.y, moved: false };
+    canvas.setPointerCapture(event.pointerId);
+  });
+
+  canvas?.addEventListener('pointermove', event => {
+    const point = pointerPosition(event);
+    if (pointerStart) {
+      const dx = point.x - pointerStart.x;
+      const dy = point.y - pointerStart.y;
+      if (Math.hypot(dx, dy) > 4) pointerStart.moved = true;
+      if (dragged) {
+        const world = screenToWorld(point.x, point.y);
+        dragged.x = world.x;
+        dragged.y = world.y;
+        dragged.vx = 0;
+        dragged.vy = 0;
+        simulationFrames = Math.min(simulationFrames, 300);
+      } else if (panning) {
+        view.x = pointerStart.viewX + dx;
+        view.y = pointerStart.viewY + dy;
+      }
+      draw();
+      return;
+    }
+    hovered = nodeAt(point.x, point.y);
+    canvas.style.cursor = hovered ? 'pointer' : 'grab';
+    if (tooltip && tooltipTitle && hovered) {
+      tooltipTitle.textContent = `${hovered.icon} ${hovered.label}`;
+      tooltip.style.left = `${Math.min(point.x + 14, width - 220)}px`;
+      tooltip.style.top = `${Math.max(point.y - 48, 58)}px`;
+      tooltip.classList.remove('hidden');
+    } else {
+      tooltip?.classList.add('hidden');
+    }
+    draw();
+  });
+
+  canvas?.addEventListener('pointerup', event => {
+    const point = pointerPosition(event);
+    const clicked = nodeAt(point.x, point.y);
+    if (clicked && pointerStart && !pointerStart.moved && clicked.url) window.location.href = clicked.url;
+    dragged = null;
+    panning = false;
+    pointerStart = null;
+  });
+
+  canvas?.addEventListener('pointerleave', () => {
+    if (!pointerStart) {
+      hovered = null;
+      tooltip?.classList.add('hidden');
+      draw();
+    }
+  });
+
+  canvas?.addEventListener('wheel', event => {
+    event.preventDefault();
+    const point = pointerPosition(event);
+    const before = screenToWorld(point.x, point.y);
+    view.scale = Math.max(.45, Math.min(2.6, view.scale * (event.deltaY > 0 ? .9 : 1.1)));
+    const after = screenToWorld(point.x, point.y);
+    view.x += (after.x - before.x) * view.scale;
+    view.y += (after.y - before.y) * view.scale;
+    draw();
+  }, { passive: false });
+
+  const zoom = factor => {
+    view.scale = Math.max(.45, Math.min(2.6, view.scale * factor));
+    draw();
+  };
+  document.getElementById('zoom-in')?.addEventListener('click', () => zoom(1.2));
+  document.getElementById('zoom-out')?.addEventListener('click', () => zoom(.8));
+  document.getElementById('reset-view')?.addEventListener('click', () => {
+    view = { x: 0, y: 0, scale: 1 };
+    draw();
+  });
+  searchInput?.addEventListener('input', event => {
+    searchTerm = event.target.value.trim().toLocaleLowerCase('tr-TR');
+    const match = searchTerm ? nodes.find(node => node.label.toLocaleLowerCase('tr-TR').includes(searchTerm)) : null;
+    if (match) {
+      view.x = -match.x * view.scale;
+      view.y = -match.y * view.scale;
+    }
+    draw();
+  });
+
+  new ResizeObserver(resize).observe(container);
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  resize();
+  tick();
+</script>

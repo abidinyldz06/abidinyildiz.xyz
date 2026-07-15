@@ -93,11 +93,10 @@ const items = [
   const libraryItems = [...document.querySelectorAll<HTMLElement>('[data-library-type]')];
   const emptyMessage = document.getElementById('library-empty');
 
-  libraryButtons.forEach(button => button.addEventListener('click', () => {
-    const filter = button.dataset.libraryFilter || 'all';
+  const applyLibraryFilter = (filter: string, updateURL = false) => {
     let visibleCount = 0;
     libraryButtons.forEach(candidate => {
-      const active = candidate === button;
+      const active = candidate.dataset.libraryFilter === filter;
       candidate.setAttribute('aria-pressed', String(active));
       candidate.classList.toggle('bg-forest-text-light', active);
       candidate.classList.toggle('text-white', active);
@@ -112,5 +111,19 @@ const items = [
       if (visible) visibleCount += 1;
     });
     emptyMessage?.classList.toggle('hidden', visibleCount > 0);
+    if (updateURL) {
+      const url = new URL(window.location.href);
+      if (filter === 'all') url.searchParams.delete('garden');
+      else url.searchParams.set('garden', filter);
+      history.replaceState({}, '', url);
+    }
+  };
+
+  libraryButtons.forEach(button => button.addEventListener('click', () => {
+    applyLibraryFilter(button.dataset.libraryFilter || 'all', true);
   }));
+
+  const requestedGarden = new URLSearchParams(window.location.search).get('garden');
+  const initialFilter = libraryButtons.some(button => button.dataset.libraryFilter === requestedGarden) ? requestedGarden! : 'all';
+  applyLibraryFilter(initialFilter);
 </script>
