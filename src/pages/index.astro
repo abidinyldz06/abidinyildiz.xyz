@@ -58,7 +58,7 @@ const seedCards = seeds.map((seed) => {
             </div>
             
             <div class="flex gap-2">
-              <button id="filter-toggle" class="w-10 h-10 rounded-full bg-forest-text-light/5 dark:bg-white/5 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 flex items-center justify-center hover:bg-forest-text-light/10 dark:hover:bg-white/10 transition-colors">
+              <button id="filter-toggle" type="button" aria-label="Filtreleri göster veya gizle" class="w-10 h-10 rounded-full bg-forest-text-light/5 dark:bg-white/5 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 flex items-center justify-center hover:bg-forest-text-light/10 dark:hover:bg-white/10 transition-colors">
                 <span class="text-forest-text-light dark:text-forest-text-dark">≡</span>
               </button>
             </div>
@@ -66,19 +66,19 @@ const seedCards = seeds.map((seed) => {
 
           <!-- Filters -->
           <div class="flex gap-2 mb-10 flex-wrap" id="filter-bar">
-            <button data-filter="all" class="filter-btn active px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light text-white dark:bg-forest-card-dark dark:text-forest-text-dark border border-forest-text-light dark:border-forest-accent-dark/20 hover:opacity-90 transition-all shadow-lg dark:shadow-forest-glow/10">
+            <button type="button" data-filter="all" aria-pressed="true" class="filter-btn active px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light text-white dark:bg-forest-card-dark dark:text-forest-text-dark border border-forest-text-light dark:border-forest-accent-dark/20 hover:opacity-90 transition-all shadow-lg dark:shadow-forest-glow/10">
               Tümü
             </button>
-            <button data-filter="seed" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
+            <button type="button" data-filter="seed" aria-pressed="false" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
               🌱 Tohum
             </button>
-            <button data-filter="seedling" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
+            <button type="button" data-filter="seedling" aria-pressed="false" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
               🌿 Fidan
             </button>
-            <button data-filter="sapling" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
+            <button type="button" data-filter="sapling" aria-pressed="false" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
               🌳 Genç Ağaç
             </button>
-            <button data-filter="tree" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
+            <button type="button" data-filter="tree" aria-pressed="false" class="filter-btn px-4 py-1.5 rounded-md text-sm font-bold bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-forest-text-dark/80 hover:bg-forest-text-light/20 dark:hover:bg-white/10 transition-colors">
               🌲 Kadim Ağaç
             </button>
           </div>
@@ -146,9 +146,11 @@ const seedCards = seeds.map((seed) => {
       document.querySelectorAll('.filter-btn').forEach(b => {
         b.classList.remove('!bg-forest-text-light', '!text-white', 'dark:!bg-forest-card-dark', 'dark:!text-forest-text-dark', 'shadow-lg', 'active');
         b.classList.add('bg-forest-text-light/10', 'dark:bg-white/5');
+        b.setAttribute('aria-pressed', 'false');
       });
       btn.classList.add('!bg-forest-text-light', '!text-white', 'dark:!bg-forest-card-dark', 'dark:!text-forest-text-dark', 'shadow-lg', 'active');
       btn.classList.remove('bg-forest-text-light/10', 'dark:bg-white/5');
+      btn.setAttribute('aria-pressed', 'true');
       
       // Filter cards
       document.querySelectorAll('#seeds-grid > *').forEach(card => {

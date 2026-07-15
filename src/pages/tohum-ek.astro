@@ -24,23 +24,23 @@ import TopNav from '../components/TopNav.astro';
           
           <div class="flex gap-4">
             <div class="w-20">
-              <label class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">İkon</label>
-              <input type="text" id="seed-icon" value="🌱" class="w-full px-4 py-3 text-center rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-2xl focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all" required />
+              <label for="seed-icon" class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">İkon</label>
+              <input type="text" id="seed-icon" name="icon" value="🌱" class="w-full px-4 py-3 text-center rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-2xl focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all" required />
             </div>
             <div class="flex-1">
-              <label class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">Başlık</label>
-              <input type="text" id="seed-title" placeholder="Örn: Siyaset, Makine Öğrenmesi..." class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all font-medium" required />
+              <label for="seed-title" class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">Başlık</label>
+              <input type="text" id="seed-title" name="title" autocomplete="off" placeholder="Örn: Siyaset, Makine Öğrenmesi..." class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all font-medium" required />
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">Kısa Açıklama</label>
-            <textarea id="seed-desc" rows="2" placeholder="Bu tohumun amacı nedir?" class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all resize-none"></textarea>
+            <label for="seed-desc" class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">Kısa Açıklama</label>
+            <textarea id="seed-desc" name="description" rows="2" placeholder="Bu tohumun amacı nedir?" class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all resize-none"></textarea>
           </div>
 
           <div>
-            <label class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">Etiketler (Virgülle ayırın)</label>
-            <input type="text" id="seed-tags" placeholder="Örn: fikir, proje, araştırma" class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all text-sm font-mono" />
+            <label for="seed-tags" class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">Etiketler (Virgülle ayırın)</label>
+            <input type="text" id="seed-tags" name="tags" autocomplete="off" placeholder="Örn: fikir, proje, araştırma" class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all text-sm font-mono" />
           </div>
 
           <button type="submit" class="w-full py-4 rounded-xl bg-forest-text-light dark:bg-[#1E3B2D] text-white dark:text-forest-accent-dark font-bold border border-transparent dark:border-forest-accent-dark/20 hover:opacity-90 transition-all shadow-lg flex items-center justify-center gap-2">
@@ -56,7 +56,7 @@ import TopNav from '../components/TopNav.astro';
           </p>
           <div class="relative">
             <textarea id="md-output" readonly rows="12" class="w-full px-4 py-4 rounded-xl bg-black/5 dark:bg-black/40 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark font-mono text-sm resize-none"></textarea>
-            <button id="copy-btn" class="absolute top-4 right-4 px-3 py-1 bg-forest-accent-light text-white dark:bg-forest-accent-dark dark:text-black font-bold text-xs rounded shadow-md hover:scale-105 transition-transform">
+            <button id="copy-btn" type="button" class="absolute top-4 right-4 px-3 py-1 bg-forest-accent-light text-white dark:bg-forest-accent-dark dark:text-black font-bold text-xs rounded shadow-md hover:scale-105 transition-transform">
               Kopyala
             </button>
           </div>
@@ -92,11 +92,11 @@ import TopNav from '../components/TopNav.astro';
     
     // Generate Markdown
     let md = `---
-title: "${title}"
+title: ${JSON.stringify(title)}
 plantedAt: ${date}
-icon: "${icon}"
-description: "${desc}"
-tags: [${tags.join(', ')}]
+icon: ${JSON.stringify(icon)}
+description: ${JSON.stringify(desc)}
+tags: [${tags.map(tag => JSON.stringify(tag)).join(', ')}]
 ---
 
 # ${title}
@@ -126,13 +126,23 @@ Bu tohum ${date} tarihinde ekildi.
   });
 
   copyBtn?.addEventListener('click', async () => {
+    let copied = false;
+
     try {
-      await navigator.clipboard.writeText(mdOutput.value);
-    } catch (err) {
-      mdOutput.select();
-      document.execCommand('copy');
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(mdOutput.value);
+        copied = true;
+      }
+    } catch {
+      // Güvenli olmayan bağlantılarda Clipboard API kullanılamayabilir.
     }
-    copyBtn.textContent = 'Kopyalandı!';
+
+    if (!copied) {
+      mdOutput.focus();
+      mdOutput.select();
+    }
+
+    copyBtn.textContent = copied ? 'Kopyalandı!' : 'Seçildi — Ctrl+C';
     setTimeout(() => {
       copyBtn.textContent = 'Kopyala';
     }, 2000);

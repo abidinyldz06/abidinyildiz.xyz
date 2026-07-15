@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { getStageInfo, needsWater, formatTimeSince } from '../lib/growth';
+import { needsWater, formatTimeSince } from '../lib/growth';
 
 const seeds = await getCollection('seeds');
 const leaves = await getCollection('leaves');
@@ -31,7 +31,7 @@ const recentLeaves = [...leaves]
       Bu konular uzun süredir sulanmadı. Yeni bir yaprak ekle!
     </p>
 
-    <div class="space-y-4">
+    <div id="thirsty-container" class="space-y-4">
       {thirstySeeds.map(seed => {
         const seedLeaves = leaves.filter(l => l.data.seedRef === seed.id);
         const lastDate = seedLeaves.length > 0

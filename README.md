@@ -1,43 +1,51 @@
-# Astro Starter Kit: Minimal
+# abidinyildiz.xyz
+
+Abidin Yıldız'ın fikirlerini, projelerini ve notlarını bir dijital bahçe düzeninde yayımlayan kişisel web sitesi.
+
+## Yapı
+
+- **Tohumlar (`seeds`)**: Zaman içinde gelişen ana konular.
+- **Yapraklar (`leaves`)**: Bir tohuma bağlı yazılar ve notlar.
+- **Bakım sistemi**: İçeriklerin yaşına ve son güncelleme tarihine göre büyüme/sulama durumu.
+- **Obsidian eşitleme**: Yerel kasadaki `seeds` ve `leaves` klasörlerini site içeriğine kopyalayan yardımcı araç.
+
+## Gereksinimler
+
+- Node.js 22.12 veya üzeri
+- npm
+
+## Yerel geliştirme
 
 ```sh
-npm create astro@latest -- --template minimal
+npm install
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Site varsayılan olarak `http://localhost:4321` adresinde açılır.
 
-## 🚀 Project Structure
+## Komutlar
 
-Inside of your Astro project, you'll see the following folders and files:
+| Komut | Açıklama |
+| --- | --- |
+| `npm run dev` | Geliştirme sunucusunu başlatır. |
+| `npm run build` | Üretim sürümünü `dist/` klasörüne derler. |
+| `npm run preview` | Üretim derlemesini yerelde önizler. |
+| `npm run astro -- check` | Astro ve TypeScript tanılamalarını çalıştırır. |
+| `npm run sync` | Obsidian içeriğini kopyalar, commit eder ve uzak depoya gönderir. |
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+## İçerik ekleme
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Tohumlar `src/content/seeds/`, yapraklar ise `src/content/leaves/` altında Markdown olarak tutulur. Başlangıç dosyaları için `obsidian_templates/` klasöründeki şablonlar kullanılabilir.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Obsidian eşitleme
 
-Any static assets, like images, can be placed in the `public/` directory.
+1. `.env.example` dosyasını `.env` adıyla kopyalayın.
+2. `OBSIDIAN_VAULT_PATH` değerini Obsidian kasanızın mutlak yolu olarak ayarlayın.
+3. Kasanın kökünde `seeds/` ve/veya `leaves/` klasörlerinin bulunduğundan emin olun.
+4. `npm run sync` komutunu çalıştırın.
 
-## 🧞 Commands
+> `sync` komutu yalnızca dosya kopyalamaz; değişiklik varsa otomatik olarak Git commit ve push işlemi de yapar.
 
-All commands are run from the root of the project, from a terminal:
+## Teknolojiler
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Astro 7, Tailwind CSS 4, Astro Content Collections, MDX ve Fuse.js.
