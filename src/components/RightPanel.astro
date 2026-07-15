@@ -1,0 +1,94 @@
+---
+import { getCollection } from 'astro:content';
+import { getStageInfo, needsWater, formatTimeSince } from '../lib/growth';
+
+const seeds = await getCollection('seeds');
+const leaves = await getCollection('leaves');
+
+// Find thirsty seeds (no leaf in 14+ days)
+const thirstySeeds = seeds.filter(seed => {
+  const seedLeaves = leaves.filter(l => l.data.seedRef === seed.id);
+  if (seedLeaves.length === 0) return true;
+  const lastDate = new Date(Math.max(...seedLeaves.map(l => l.data.date.getTime())));
+  return needsWater(lastDate);
+}).slice(0, 3);
+
+// Recent activity (latest leaves)
+const recentLeaves = [...leaves]
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 4);
+---
+
+<aside class="w-80 h-full flex flex-col gap-6 pl-6 relative z-20 shrink-0">
+  
+  <!-- Thirsty Seeds -->
+  <div class="bg-forest-text-light/5 dark:bg-forest-card-dark/60 rounded-2xl p-6 border border-forest-accent-light/10 dark:border-forest-accent-dark/10">
+    <div class="flex items-center gap-2 mb-4">
+      <span class="text-xl text-forest-accent-light dark:text-forest-accent-dark drop-shadow-md">💧</span>
+      <h3 class="font-serif text-lg font-bold text-forest-text-light dark:text-forest-text-dark glow-text">Susamış Ağaçlar</h3>
+    </div>
+    <p class="text-sm text-forest-text-light/70 dark:text-forest-text-dark/70 mb-6 leading-relaxed">
+      Bu konular uzun süredir sulanmadı. Yeni bir yaprak ekle!
+    </p>
+
+    <div class="space-y-4">
+      {thirstySeeds.map(seed => {
+        const seedLeaves = leaves.filter(l => l.data.seedRef === seed.id);
+        const lastDate = seedLeaves.length > 0
+          ? new Date(Math.max(...seedLeaves.map(l => l.data.date.getTime())))
+          : null;
+        const stageInfo = getStageInfo(new Date(seed.data.plantedAt));
+        
+        return (
+          <a href={`/seeds/${seed.id}`} class="flex gap-4 group block">
+            <div class="w-10 h-10 rounded-full bg-red-900/10 dark:bg-red-900/30 flex items-center justify-center shrink-0 text-lg group-hover:scale-110 transition-transform">
+              {seed.data.icon}
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-forest-text-light dark:text-forest-text-dark group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark transition-colors">{seed.data.title}</h4>
+              <p class="text-xs text-forest-text-light/50 dark:text-forest-text-dark/50">
+                {lastDate ? formatTimeSince(lastDate) + ' sulandı' : 'Hiç sulanmadı'}
+              </p>
+            </div>
+          </a>
+        );
+      })}
+      
+      {thirstySeeds.length === 0 && (
+        <p class="text-sm text-forest-accent-light dark:text-forest-accent-dark font-medium text-center py-2">
+          ✅ Tüm ağaçlar sağlıklı!
+        </p>
+      )}
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="bg-forest-text-light/5 dark:bg-forest-card-dark/60 rounded-2xl p-6 border border-forest-accent-light/10 dark:border-forest-accent-dark/10 flex-1">
+    <div class="flex items-center gap-2 mb-6">
+      <span class="text-xl text-forest-accent-light dark:text-forest-accent-dark drop-shadow-md">⏱️</span>
+      <h3 class="font-serif text-lg font-bold text-forest-text-light dark:text-forest-text-dark glow-text">Son Bakım</h3>
+    </div>
+
+    <div class="relative border-l-2 border-forest-accent-light/30 dark:border-forest-accent-dark/30 ml-2 space-y-5">
+      {recentLeaves.map((leaf, i) => {
+        const parentSeed = seeds.find(s => s.id === leaf.data.seedRef);
+        return (
+          <a href={`/leaves/${leaf.id}`} class="relative pl-6 block group">
+            <div class={`absolute -left-[5px] top-1.5 w-2 h-2 rounded-full ${i === 0 ? 'bg-forest-accent-light dark:bg-forest-accent-dark shadow-[0_0_8px_rgba(74,222,128,0.8)]' : 'bg-forest-accent-light/40 dark:bg-forest-accent-dark/40'}`}></div>
+            <p class="text-sm text-forest-text-light dark:text-forest-text-dark group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark transition-colors">
+              🍃 <span class="font-semibold">{leaf.data.title}</span>
+            </p>
+            <p class="text-xs text-forest-text-light/50 dark:text-forest-text-dark/50 mt-0.5">
+              {parentSeed ? `${parentSeed.data.icon} ${parentSeed.data.title}` : ''} · {formatTimeSince(leaf.data.date)}
+            </p>
+          </a>
+        );
+      })}
+      
+      {recentLeaves.length === 0 && (
+        <p class="pl-6 text-sm text-forest-text-light/50 dark:text-forest-text-dark/50">Henüz yaprak eklenmemiş.</p>
+      )}
+    </div>
+  </div>
+
+</aside>

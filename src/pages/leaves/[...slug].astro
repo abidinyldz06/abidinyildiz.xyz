@@ -1,0 +1,109 @@
+---
+import Base from '../../layouts/Base.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import TopNav from '../../components/TopNav.astro';
+
+import { getCollection, render } from 'astro:content';
+import { formatTimeSince } from '../../lib/growth';
+
+export async function getStaticPaths() {
+  const leaves = await getCollection('leaves');
+  return leaves.map(leaf => ({
+    params: { slug: leaf.id },
+    props: { leaf },
+  }));
+}
+
+const { leaf } = Astro.props;
+const { Content } = await render(leaf);
+
+// Get parent seed info
+const seeds = await getCollection('seeds');
+const parentSeed = seeds.find(s => s.id === leaf.data.seedRef);
+
+// Get sibling leaves
+const allLeaves = await getCollection('leaves');
+const siblings = allLeaves
+  .filter(l => l.data.seedRef === leaf.data.seedRef)
+  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+const currentIndex = siblings.findIndex(l => l.id === leaf.id);
+const prevLeaf = currentIndex > 0 ? siblings[currentIndex - 1] : null;
+const nextLeaf = currentIndex < siblings.length - 1 ? siblings[currentIndex + 1] : null;
+---
+
+<Base title={`🍃 ${leaf.data.title} — Yaşayan Orman`}>
+  
+  <Sidebar />
+
+  <main class="flex-1 h-full flex flex-col relative z-10">
+    <TopNav />
+    
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-8 pb-20">
+      <div class="max-w-3xl mx-auto">
+        
+        <!-- Breadcrumb -->
+        <div class="flex items-center gap-2 text-sm text-forest-text-light/60 dark:text-forest-text-dark/60 mb-8">
+          <a href="/" class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark transition-colors">Fidanlık</a>
+          <span>→</span>
+          {parentSeed && (
+            <>
+              <a href={`/seeds/${parentSeed.id}`} class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark transition-colors flex items-center gap-1">
+                <span>{parentSeed.data.icon}</span> {parentSeed.data.title}
+              </a>
+              <span>→</span>
+            </>
+          )}
+          <span class="text-forest-text-light dark:text-forest-text-dark font-medium">🍃 {leaf.data.title}</span>
+        </div>
+
+        <!-- Leaf Header -->
+        <div class="mb-10">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="text-3xl">🍃</span>
+            <div>
+              <h1 class="text-3xl md:text-4xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark">{leaf.data.title}</h1>
+              <div class="flex items-center gap-3 mt-2">
+                <span class="text-xs font-mono text-forest-text-light/50 dark:text-forest-text-dark/50">{formatTimeSince(leaf.data.date)}</span>
+                {leaf.data.tags.map(tag => (
+                  <span class="text-xs font-mono text-forest-accent-light dark:text-forest-accent-dark">#{tag}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <article class="prose prose-lg max-w-none 
+          prose-headings:font-serif prose-headings:text-forest-text-light dark:prose-headings:text-forest-text-dark
+          prose-p:text-forest-text-light/80 dark:prose-p:text-forest-text-dark/80
+          prose-strong:text-forest-text-light dark:prose-strong:text-forest-text-dark
+          prose-a:text-forest-accent-light dark:prose-a:text-forest-accent-dark
+          prose-li:text-forest-text-light/80 dark:prose-li:text-forest-text-dark/80
+          prose-code:bg-black/10 dark:prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
+          prose-hr:border-forest-accent-light/20 dark:prose-hr:border-forest-accent-dark/20
+          mb-12">
+          <Content />
+        </article>
+
+        <!-- Navigation -->
+        <div class="flex justify-between items-center border-t border-forest-accent-light/20 dark:border-forest-accent-dark/20 pt-6">
+          {prevLeaf ? (
+            <a href={`/leaves/${prevLeaf.id}`} class="dashboard-card p-4 max-w-[45%] group block">
+              <span class="text-xs text-forest-text-light/50 dark:text-forest-text-dark/50 block mb-1">← Önceki Yaprak</span>
+              <span class="text-sm font-bold text-forest-text-light dark:text-forest-text-dark group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark transition-colors truncate block">{prevLeaf.data.title}</span>
+            </a>
+          ) : <div />}
+          
+          {nextLeaf ? (
+            <a href={`/leaves/${nextLeaf.id}`} class="dashboard-card p-4 max-w-[45%] text-right group block">
+              <span class="text-xs text-forest-text-light/50 dark:text-forest-text-dark/50 block mb-1">Sonraki Yaprak →</span>
+              <span class="text-sm font-bold text-forest-text-light dark:text-forest-text-dark group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark transition-colors truncate block">{nextLeaf.data.title}</span>
+            </a>
+          ) : <div />}
+        </div>
+
+      </div>
+    </div>
+  </main>
+  
+</Base>

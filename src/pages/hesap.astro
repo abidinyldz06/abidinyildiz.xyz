@@ -1,0 +1,155 @@
+---
+import Base from '../layouts/Base.astro';
+import TopNav from '../components/TopNav.astro';
+import { AVATARS, TITLES } from '../lib/caretaker';
+---
+
+<Base title="Yaşayan Orman — Hesap Oluştur">
+  <main class="flex-1 h-full flex flex-col relative z-10">
+    <TopNav />
+    
+    <div class="flex-1 overflow-y-auto p-8">
+      <div class="max-w-2xl mx-auto">
+        
+        <!-- Header -->
+        <div class="text-center mb-12">
+          <h2 class="text-4xl md:text-5xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark mb-3">Bahçıvanını Oluştur</h2>
+          <p class="text-forest-text-light/60 dark:text-forest-text-dark/60">Ormanın seni bekliyor. Karakterini seç ve bahçeni kur.</p>
+        </div>
+
+        <form id="character-form" class="space-y-10">
+          
+          <!-- Avatar Selection -->
+          <section>
+            <h3 class="font-serif text-xl font-bold text-forest-text-light dark:text-forest-text-dark mb-4 flex items-center gap-2">
+              <span class="text-2xl">🖼️</span> Avatar Seç
+            </h3>
+            <div class="grid grid-cols-3 sm:grid-cols-4 gap-4" id="avatar-grid">
+              {AVATARS.map((avatar) => (
+                <button type="button" data-avatar={avatar.src} class="avatar-option group relative rounded-2xl overflow-hidden border-2 border-transparent hover:border-forest-accent-light dark:hover:border-forest-accent-dark transition-all duration-300 aspect-square">
+                  <img src={avatar.src} alt={avatar.label} class="w-full h-full object-cover" />
+                  <div class="absolute inset-0 bg-forest-accent-light/0 group-hover:bg-forest-accent-light/10 dark:group-hover:bg-forest-accent-dark/10 transition-colors"></div>
+                  <span class="absolute bottom-1 left-0 right-0 text-[10px] font-bold text-center text-white bg-black/50 py-0.5">{avatar.label}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <!-- Character Name -->
+          <section>
+            <h3 class="font-serif text-xl font-bold text-forest-text-light dark:text-forest-text-dark mb-4 flex items-center gap-2">
+              <span class="text-2xl">✏️</span> Karakter Adı
+            </h3>
+            <input 
+              type="text" id="char-name" placeholder="Bahçıvan Abidin" required
+              class="w-full px-4 py-3 rounded-xl bg-white/40 dark:bg-forest-card-dark border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark placeholder:text-forest-text-light/40 dark:placeholder:text-forest-text-dark/40 focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark focus:shadow-[0_0_15px_rgba(74,222,128,0.2)] transition-all text-lg font-medium"
+            />
+          </section>
+
+          <!-- Title Selection -->
+          <section>
+            <h3 class="font-serif text-xl font-bold text-forest-text-light dark:text-forest-text-dark mb-4 flex items-center gap-2">
+              <span class="text-2xl">🏅</span> Unvan
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="title-grid">
+              {TITLES.map((t) => (
+                <button type="button" data-title={t.label} class="title-option px-4 py-3 rounded-xl text-sm font-bold text-forest-text-light dark:text-forest-text-dark bg-white/30 dark:bg-forest-card-dark border border-forest-accent-light/10 dark:border-forest-accent-dark/10 hover:border-forest-accent-light dark:hover:border-forest-accent-dark hover:bg-forest-accent-light/10 dark:hover:bg-forest-accent-dark/10 transition-all">
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <!-- Garden Name -->
+          <section>
+            <h3 class="font-serif text-xl font-bold text-forest-text-light dark:text-forest-text-dark mb-4 flex items-center gap-2">
+              <span class="text-2xl">🌳</span> Bahçe Adı
+            </h3>
+            <input 
+              type="text" id="garden-name" placeholder="Abidin'in Gizli Bahçesi" required
+              class="w-full px-4 py-3 rounded-xl bg-white/40 dark:bg-forest-card-dark border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark placeholder:text-forest-text-light/40 dark:placeholder:text-forest-text-dark/40 focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark focus:shadow-[0_0_15px_rgba(74,222,128,0.2)] transition-all text-lg font-medium"
+            />
+          </section>
+
+          <!-- Submit -->
+          <button 
+            type="submit" id="submit-btn"
+            class="w-full py-4 rounded-xl bg-forest-text-light dark:bg-[#1E3B2D] text-white dark:text-forest-accent-dark font-bold text-lg border border-transparent dark:border-forest-accent-dark/20 hover:opacity-90 transition-all shadow-xl dark:shadow-forest-glow/20 flex items-center justify-center gap-3 group"
+          >
+            <span class="text-2xl group-hover:scale-125 transition-transform">🌱</span>
+            Bahçemi Kur
+          </button>
+          
+        </form>
+      </div>
+    </div>
+  </main>
+</Base>
+
+<script>
+  let selectedAvatar = '/avatars/caretaker.png';
+  let selectedTitle = '🌲 Ormancı';
+
+  // Avatar selection
+  document.querySelectorAll('.avatar-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.avatar-option').forEach(b => b.classList.remove('ring-2', 'ring-[#4ade80]', 'shadow-[0_0_20px_rgba(74,222,128,0.5)]'));
+      btn.classList.add('ring-2', 'ring-[#4ade80]', 'shadow-[0_0_20px_rgba(74,222,128,0.5)]');
+      selectedAvatar = (btn as HTMLElement).dataset.avatar || selectedAvatar;
+    });
+  });
+
+  // Title selection
+  document.querySelectorAll('.title-option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.title-option').forEach(b => b.classList.remove('!bg-forest-accent-light/20', 'dark:!bg-forest-accent-dark/20', '!border-forest-accent-light', 'dark:!border-forest-accent-dark'));
+      btn.classList.add('!bg-forest-accent-light/20', 'dark:!bg-forest-accent-dark/20', '!border-forest-accent-light', 'dark:!border-forest-accent-dark');
+      selectedTitle = (btn as HTMLElement).dataset.title || selectedTitle;
+    });
+  });
+
+  // Form submit
+  document.getElementById('character-form')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = (document.getElementById('char-name') as HTMLInputElement).value;
+    const gardenName = (document.getElementById('garden-name') as HTMLInputElement).value;
+    
+    const caretaker = {
+      name,
+      avatar: selectedAvatar,
+      title: selectedTitle,
+      gardenName,
+      createdAt: new Date().toISOString(),
+      level: 1,
+      xp: 0,
+      xpToNext: 100,
+    };
+    
+    localStorage.setItem('caretaker', JSON.stringify(caretaker));
+    window.location.href = '/';
+  });
+
+  // Load existing data if editing
+  const existing = localStorage.getItem('caretaker');
+  if (existing) {
+    try {
+      const data = JSON.parse(existing);
+      (document.getElementById('char-name') as HTMLInputElement).value = data.name || '';
+      (document.getElementById('garden-name') as HTMLInputElement).value = data.gardenName || '';
+      selectedAvatar = data.avatar;
+      selectedTitle = data.title;
+      // Highlight selected avatar
+      document.querySelectorAll('.avatar-option').forEach(btn => {
+        if ((btn as HTMLElement).dataset.avatar === data.avatar) {
+          btn.classList.add('ring-2', 'ring-[#4ade80]', 'shadow-[0_0_20px_rgba(74,222,128,0.5)]');
+        }
+      });
+      // Highlight selected title
+      document.querySelectorAll('.title-option').forEach(btn => {
+        if ((btn as HTMLElement).dataset.title === data.title) {
+          btn.classList.add('!bg-forest-accent-light/20', 'dark:!bg-forest-accent-dark/20', '!border-forest-accent-light', 'dark:!border-forest-accent-dark');
+        }
+      });
+    } catch {}
+  }
+</script>

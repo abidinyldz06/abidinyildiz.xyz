@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@theme {
+  --color-forest-bg-light: #f4f6f1;
+  --color-forest-side-light: #e9ece4;
+  --color-forest-text-light: #2d4a3e;
+  --color-forest-accent-light: #6ba887;
+  
+  --color-forest-bg-dark: #0a1410;
+  --color-forest-side-dark: #0f1e15;
+  --color-forest-text-dark: #e0eee6;
+  --color-forest-accent-dark: #4ade80; /* neon green */
+  --color-forest-glow: #10b981;
+  --color-forest-card-dark: #122419;
+
+  --font-serif: "Fraunces", "Georgia", serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --animate-glow: glow 3s ease-in-out infinite alternate;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(74, 222, 128, 0.2); }
+    100% { box-shadow: 0 0 20px rgba(74, 222, 128, 0.6), 0 0 40px rgba(16, 185, 129, 0.4); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-forest-bg-light text-forest-text-light font-sans transition-colors duration-500 overflow-hidden relative selection:bg-forest-accent-light/30;
+    /* Soft noise for natural feel */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+  
+  html.dark body {
+    @apply bg-forest-bg-dark text-forest-text-dark selection:bg-forest-accent-dark/30;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif tracking-tight;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-forest-text-light/20 dark:bg-forest-text-dark/20 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-forest-text-light/40 dark:bg-forest-text-dark/40;
+  }
+}
+
+@layer utilities {
+  .dashboard-card {
+    @apply bg-white/40 dark:bg-forest-card-dark border border-forest-accent-light/20 dark:border-forest-accent-dark/10 rounded-2xl p-6 transition-all duration-300;
+  }
+  .dashboard-card:hover {
+    @apply border-forest-accent-light/40 dark:border-forest-accent-dark/30 shadow-lg shadow-forest-accent-light/5 dark:shadow-forest-glow/10;
+  }
+  
+  .glass-sidebar {
+    @apply bg-forest-side-light/90 dark:bg-forest-side-dark/90 backdrop-blur-xl border-r border-forest-accent-light/10 dark:border-forest-accent-dark/10;
+  }
+
+  .glow-text {
+    @apply text-forest-accent-light dark:text-forest-accent-dark drop-shadow-[0_0_8px_rgba(74,222,128,0.5)];
+  }
+}

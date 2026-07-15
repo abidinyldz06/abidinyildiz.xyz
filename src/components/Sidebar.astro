@@ -1,0 +1,93 @@
+---
+import { getCollection } from 'astro:content';
+import { getStageInfo, needsWater } from '../lib/growth';
+
+const seeds = await getCollection('seeds');
+const leaves = await getCollection('leaves');
+
+// Calculate stats
+const stageCount = { seed: 0, seedling: 0, sapling: 0, tree: 0 };
+seeds.forEach(s => {
+  const stage = getStageInfo(new Date(s.data.plantedAt)).key;
+  stageCount[stage]++;
+});
+---
+<aside class="w-72 h-full glass-sidebar flex flex-col pt-12 pb-6 px-6 relative z-20 shrink-0">
+  
+  <!-- Profile Section (JS ile localStorage'dan dolacak) -->
+  <div class="flex flex-col items-center text-center mb-8" id="profile-section">
+    <div class="relative mb-4 group">
+      <div class="absolute -inset-1 rounded-full bg-forest-accent-light/50 dark:bg-forest-accent-dark blur-md opacity-30 group-hover:opacity-70 transition-opacity duration-500"></div>
+      <img 
+        id="sidebar-avatar"
+        src="/avatars/caretaker.png" 
+        alt="Bahçıvan" 
+        class="relative w-24 h-24 rounded-full border-2 border-forest-accent-light/50 dark:border-forest-accent-dark/50 object-cover shadow-lg"
+      />
+    </div>
+    <h2 id="sidebar-name" class="text-2xl font-serif font-bold text-forest-text-light dark:text-forest-text-dark mb-1 glow-text">Bahçıvan</h2>
+    <p id="sidebar-title" class="text-xs font-mono text-forest-accent-light dark:text-forest-accent-dark/80 font-bold tracking-widest uppercase mb-3">🌲 Ormancı</p>
+    
+    <!-- Progress Bar -->
+    <div class="w-full bg-black/5 dark:bg-black/30 rounded-full h-1.5 mb-2 overflow-hidden">
+      <div id="sidebar-xp-bar" class="bg-forest-accent-light dark:bg-forest-accent-dark h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+    </div>
+    <p id="sidebar-xp-text" class="text-[10px] font-mono text-forest-text-light/60 dark:text-forest-text-dark/50">Seviye 1</p>
+  </div>
+
+  <!-- Plant New Seed -->
+  <a href="/hesap" class="w-full bg-forest-text-light dark:bg-[#1E3B2D] hover:bg-forest-text-light/90 dark:hover:bg-[#254938] text-white dark:text-forest-accent-dark/90 rounded-lg py-3 px-4 font-semibold text-sm mb-8 transition-colors flex items-center justify-center gap-2 shadow-lg dark:shadow-forest-glow/10 border border-transparent dark:border-forest-accent-dark/20 text-center">
+    <span>⚙️ Profil Düzenle</span>
+  </a>
+
+  <!-- Navigation -->
+  <nav class="flex-1 space-y-2">
+    <a href="/" class="flex items-center justify-between px-4 py-3 bg-black/5 dark:bg-[#1B3024] text-forest-text-light dark:text-forest-text-dark font-medium rounded-lg text-sm">
+      <span class="flex items-center gap-3"><span class="text-lg opacity-80">🌱</span> Fidanlık</span>
+      <span class="text-xs bg-forest-accent-light/20 dark:bg-forest-accent-dark/20 text-forest-accent-light dark:text-forest-accent-dark px-2 py-0.5 rounded-full font-bold">{seeds.length}</span>
+    </a>
+    <a href="#" class="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 text-forest-text-light/80 dark:text-forest-text-dark/70 font-medium rounded-lg text-sm transition-colors">
+      <span class="flex items-center gap-3"><span class="text-lg opacity-60">🌲</span> Kadim Ağaçlar</span>
+      <span class="text-xs text-forest-text-light/40 dark:text-forest-text-dark/40 font-bold">{stageCount.tree}</span>
+    </a>
+    <a href="#" class="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 text-forest-text-light/80 dark:text-forest-text-dark/70 font-medium rounded-lg text-sm transition-colors">
+      <span class="flex items-center gap-3"><span class="text-lg opacity-60">🍃</span> Tüm Yapraklar</span>
+      <span class="text-xs text-forest-text-light/40 dark:text-forest-text-dark/40 font-bold">{leaves.length}</span>
+    </a>
+    <a href="#" class="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 text-forest-text-light/80 dark:text-forest-text-dark/70 font-medium rounded-lg text-sm transition-colors">
+      <span class="flex items-center gap-3"><span class="text-lg opacity-60">🕸️</span> Ekosistem</span>
+    </a>
+    <a href="#" class="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 text-forest-text-light/80 dark:text-forest-text-dark/70 font-medium rounded-lg text-sm transition-colors">
+      <span class="flex items-center gap-3"><span class="text-lg opacity-60">📊</span> Gelişim</span>
+    </a>
+  </nav>
+
+  <!-- Bottom -->
+  <div class="mt-auto space-y-2">
+    <a href="/hesap" class="flex items-center gap-3 px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5 text-forest-text-light/70 dark:text-forest-text-dark/60 rounded-lg text-sm transition-colors">
+      <span class="text-lg opacity-50">⚙️</span>
+      Ayarlar
+    </a>
+  </div>
+</aside>
+
+<script>
+  // Load caretaker from localStorage
+  const data = localStorage.getItem('caretaker');
+  if (data) {
+    try {
+      const c = JSON.parse(data);
+      const avatarEl = document.getElementById('sidebar-avatar') as HTMLImageElement;
+      const nameEl = document.getElementById('sidebar-name');
+      const titleEl = document.getElementById('sidebar-title');
+      const xpBar = document.getElementById('sidebar-xp-bar') as HTMLElement;
+      const xpText = document.getElementById('sidebar-xp-text');
+      
+      if (avatarEl) avatarEl.src = c.avatar;
+      if (nameEl) nameEl.textContent = c.name;
+      if (titleEl) titleEl.textContent = c.title;
+      if (xpBar) xpBar.style.width = `${(c.xp / c.xpToNext) * 100}%`;
+      if (xpText) xpText.textContent = `Seviye ${c.level} — ${c.xp}/${c.xpToNext} XP`;
+    } catch {}
+  }
+</script>

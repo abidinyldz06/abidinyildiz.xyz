@@ -1,0 +1,41 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Living Forest - Digital Ecosystem" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Inter:wght@300..800&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+		
+		<script is:inline>
+			if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+				document.documentElement.classList.add('dark');
+			} else {
+				document.documentElement.classList.remove('dark');
+			}
+		</script>
+	</head>
+	<body class="antialiased w-full h-screen flex overflow-hidden">
+		<!-- Magic Glow Backgrounds (Subtle) -->
+		<div class="fixed top-[-20%] left-[-10%] w-[50%] h-[50%] bg-forest-accent-light/10 dark:bg-forest-glow/5 rounded-full blur-[150px] pointer-events-none z-0"></div>
+		<div class="fixed bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#3b82f6]/10 dark:bg-[#3b82f6]/5 rounded-full blur-[150px] pointer-events-none z-0"></div>
+		
+		<slot />
+		
+	</body>
+</html>

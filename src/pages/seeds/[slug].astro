@@ -1,0 +1,157 @@
+---
+import Base from '../../layouts/Base.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import TopNav from '../../components/TopNav.astro';
+
+import { getCollection } from 'astro:content';
+import { getStageInfo, getGrowthPercent, formatTimeSince, needsWater, daysSince } from '../../lib/growth';
+
+export async function getStaticPaths() {
+  const seeds = await getCollection('seeds');
+  return seeds.map(seed => ({
+    params: { slug: seed.id },
+    props: { seed },
+  }));
+}
+
+const { seed } = Astro.props;
+const allLeaves = await getCollection('leaves');
+const seedLeaves = allLeaves
+  .filter(l => l.data.seedRef === seed.id)
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+
+const plantedAt = new Date(seed.data.plantedAt);
+const stageInfo = getStageInfo(plantedAt);
+const growthPercent = getGrowthPercent(plantedAt);
+const lastLeafDate = seedLeaves.length > 0
+  ? new Date(Math.max(...seedLeaves.map(l => l.data.date.getTime())))
+  : null;
+const isThirsty = needsWater(lastLeafDate);
+const daysAlive = daysSince(plantedAt);
+---
+
+<Base title={`${seed.data.icon} ${seed.data.title} — Yaşayan Orman`}>
+  
+  <Sidebar />
+
+  <main class="flex-1 h-full flex flex-col relative z-10">
+    <TopNav />
+    
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-8 pb-20">
+      <div class="max-w-4xl mx-auto">
+        
+        <!-- Back -->
+        <a href="/" class="inline-flex items-center gap-2 text-sm text-forest-text-light/60 dark:text-forest-text-dark/60 hover:text-forest-accent-light dark:hover:text-forest-accent-dark mb-8 transition-colors font-medium">
+          ← Fidanlığa Dön
+        </a>
+
+        <!-- Seed Header -->
+        <div class="dashboard-card p-8 mb-8 relative overflow-hidden">
+          <!-- Glow background -->
+          <div class="absolute -top-20 -right-20 w-64 h-64 bg-forest-accent-light/10 dark:bg-forest-glow/10 rounded-full blur-3xl"></div>
+          
+          <div class="relative z-10 flex flex-col md:flex-row gap-8">
+            <!-- Tree Visual -->
+            <div class="flex flex-col items-center gap-4">
+              <div class="w-32 h-32 rounded-3xl bg-forest-text-light/5 dark:bg-forest-card-dark border-2 border-forest-accent-light/20 dark:border-forest-accent-dark/20 flex items-center justify-center text-6xl shadow-inner group-hover:shadow-[0_0_30px_rgba(74,222,128,0.3)]">
+                {seed.data.icon}
+              </div>
+              <span class={`text-sm font-bold px-4 py-1.5 rounded-lg ${stageInfo.color}`}>
+                {stageInfo.icon} {stageInfo.label}
+              </span>
+            </div>
+            
+            <!-- Info -->
+            <div class="flex-1">
+              <h1 class="text-3xl md:text-4xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark mb-2">{seed.data.title}</h1>
+              <p class="text-forest-text-light/60 dark:text-forest-text-dark/60 mb-6">{seed.data.description}</p>
+              
+              <!-- Stats Row -->
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="bg-black/5 dark:bg-black/20 rounded-xl p-3">
+                  <div class="text-2xl font-bold text-forest-text-light dark:text-forest-text-dark">{seedLeaves.length}</div>
+                  <div class="text-[10px] uppercase tracking-widest text-forest-text-light/50 dark:text-forest-text-dark/50 font-bold">Yaprak</div>
+                </div>
+                <div class="bg-black/5 dark:bg-black/20 rounded-xl p-3">
+                  <div class="text-2xl font-bold text-forest-text-light dark:text-forest-text-dark">{daysAlive}</div>
+                  <div class="text-[10px] uppercase tracking-widest text-forest-text-light/50 dark:text-forest-text-dark/50 font-bold">Gün</div>
+                </div>
+                <div class="bg-black/5 dark:bg-black/20 rounded-xl p-3">
+                  <div class="text-2xl font-bold text-forest-accent-light dark:text-forest-accent-dark">{growthPercent}%</div>
+                  <div class="text-[10px] uppercase tracking-widest text-forest-text-light/50 dark:text-forest-text-dark/50 font-bold">Büyüme</div>
+                </div>
+                <div class={`bg-black/5 dark:bg-black/20 rounded-xl p-3 ${isThirsty ? 'ring-1 ring-red-400/50' : ''}`}>
+                  <div class="text-2xl font-bold">{isThirsty ? '🥀' : '💧'}</div>
+                  <div class="text-[10px] uppercase tracking-widest text-forest-text-light/50 dark:text-forest-text-dark/50 font-bold">{isThirsty ? 'Susuz' : 'Sağlıklı'}</div>
+                </div>
+              </div>
+              
+              <!-- Growth Bar -->
+              <div class="mt-6">
+                <div class="flex justify-between text-[10px] font-bold uppercase tracking-widest text-forest-text-light/40 dark:text-forest-text-dark/40 mb-2">
+                  <span>🌱 Tohum</span>
+                  <span>🌿 Fidan</span>
+                  <span>🌳 Genç Ağaç</span>
+                  <span>🌲 Kadim</span>
+                </div>
+                <div class="w-full bg-black/10 dark:bg-black/30 rounded-full h-2.5 overflow-hidden">
+                  <div class="bg-gradient-to-r from-emerald-400 via-green-500 to-forest-accent-dark h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(74,222,128,0.5)]" style={`width: ${growthPercent}%`}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tags -->
+        {seed.data.tags.length > 0 && (
+          <div class="flex flex-wrap gap-2 mb-8">
+            {seed.data.tags.map(tag => (
+              <span class="px-3 py-1 text-xs font-mono font-medium rounded-lg bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 text-forest-accent-light dark:text-forest-accent-dark border border-forest-accent-light/20 dark:border-forest-accent-dark/20">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        <!-- Leaves Section -->
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-serif font-bold text-forest-text-light dark:text-forest-text-dark flex items-center gap-2">
+              <span>🍃</span> Yapraklar ({seedLeaves.length})
+            </h2>
+          </div>
+
+          {seedLeaves.length === 0 ? (
+            <div class="dashboard-card p-8 text-center">
+              <p class="text-4xl mb-4">🍂</p>
+              <p class="text-forest-text-light/60 dark:text-forest-text-dark/60 font-medium">Bu ağaçta henüz yaprak yok.</p>
+              <p class="text-sm text-forest-text-light/40 dark:text-forest-text-dark/40 mt-2">Obsidian'dan <code class="bg-black/10 dark:bg-white/10 px-1.5 py-0.5 rounded text-xs">src/content/leaves/{seed.id}/</code> klasörüne yeni bir .md dosyası ekle.</p>
+            </div>
+          ) : (
+            <div class="space-y-4">
+              {seedLeaves.map((leaf) => (
+                <a href={`/leaves/${leaf.id}`} class="dashboard-card group flex items-center gap-6 p-5 block">
+                  <div class="w-10 h-10 rounded-full bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 flex items-center justify-center text-lg group-hover:scale-110 group-hover:bg-forest-accent-light/20 dark:group-hover:bg-forest-accent-dark/20 transition-all">
+                    🍃
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h3 class="text-base font-bold text-forest-text-light dark:text-forest-text-dark group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark transition-colors truncate">{leaf.data.title}</h3>
+                    <div class="flex items-center gap-3 mt-1">
+                      <span class="text-xs text-forest-text-light/50 dark:text-forest-text-dark/50">{formatTimeSince(leaf.data.date)}</span>
+                      {leaf.data.tags.map(tag => (
+                        <span class="text-[10px] font-mono text-forest-accent-light/60 dark:text-forest-accent-dark/60">#{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                  <span class="text-forest-text-light/30 dark:text-forest-text-dark/30 group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark transition-colors text-xl">→</span>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+
+      </div>
+    </div>
+  </main>
+  
+</Base>

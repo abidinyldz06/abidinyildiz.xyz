@@ -1,0 +1,59 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  slug: string;
+  stage: 'Sprout' | 'Seedling' | 'Sapling' | 'Mature Tree';
+  drops: number;
+  lastWatered: string;
+}
+
+const { title, description, slug, stage, drops, lastWatered } = Astro.props;
+
+const stageIcon = {
+  'Sprout': '🌱',
+  'Seedling': '🌿',
+  'Sapling': '🌳',
+  'Mature Tree': '🌲'
+}[stage];
+
+const stageColor = {
+  'Sprout': 'bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-white/80',
+  'Seedling': 'bg-forest-text-light/10 text-forest-text-light dark:bg-white/5 dark:text-white/80',
+  'Sapling': 'bg-forest-accent-light/20 text-forest-accent-light dark:bg-forest-accent-dark/20 dark:text-forest-accent-dark',
+  'Mature Tree': 'bg-earth/20 text-earth dark:bg-earth/20 dark:text-earth/90'
+}[stage];
+---
+<a href={`/notes/${slug}`} class="dashboard-card group flex flex-col h-full relative overflow-hidden block">
+  
+  <div class="flex justify-between items-start mb-6">
+    <!-- Icon Circle -->
+    <div class="w-14 h-14 rounded-full bg-forest-text-light/10 dark:bg-forest-card-dark border border-forest-accent-light/20 dark:border-forest-accent-dark/20 flex items-center justify-center text-2xl group-hover:scale-110 group-hover:border-forest-accent-light dark:group-hover:border-forest-accent-dark transition-all duration-300 shadow-inner group-hover:shadow-[0_0_15px_rgba(74,222,128,0.3)]">
+      {stageIcon}
+    </div>
+    
+    <!-- Stage Pill -->
+    <span class={`text-xs font-bold px-3 py-1 rounded-md ${stageColor}`}>
+      {stage}
+    </span>
+  </div>
+
+  <div class="flex-1">
+    <h3 class="text-xl font-serif font-bold text-forest-text-light dark:text-forest-text-dark mb-2 group-hover:text-forest-accent-light dark:group-hover:text-forest-accent-dark transition-colors">
+      {title}
+    </h3>
+    <p class="text-sm text-forest-text-light/60 dark:text-forest-text-dark/60 line-clamp-3 leading-relaxed">
+      {description}
+    </p>
+  </div>
+
+  <div class="mt-8 flex items-center justify-between text-xs text-forest-text-light/50 dark:text-forest-text-dark/50">
+    <!-- Drops Counter -->
+    <div class="flex items-center gap-1.5 px-2 py-1 bg-black/5 dark:bg-black/30 rounded-full border border-forest-accent-light/10 dark:border-forest-accent-dark/10 group-hover:bg-forest-accent-light/10 dark:group-hover:bg-forest-accent-dark/10 transition-colors">
+      <span class="text-forest-accent-light dark:text-forest-accent-dark">💧</span>
+      <span class="font-bold">+{drops}</span>
+    </div>
+    
+    <span class="font-medium tracking-wide">Son sulanma: {lastWatered}</span>
+  </div>
+</a>

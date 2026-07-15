@@ -1,0 +1,23 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+---
+<header class="h-20 w-full flex items-center justify-between px-8 relative z-20">
+  <div class="flex items-center">
+    <h1 class="text-2xl font-serif font-bold text-forest-text-light dark:text-forest-text-dark glow-text tracking-tight">Yaşayan Orman</h1>
+  </div>
+  
+  <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-forest-text-light/60 dark:text-forest-text-dark/60 uppercase tracking-widest">
+    <a href="#" class="text-forest-accent-light dark:text-forest-accent-dark border-b-2 border-forest-accent-light dark:border-forest-accent-dark pb-1">Bahçe</a>
+    <a href="#" class="hover:text-forest-text-light dark:hover:text-forest-text-dark transition-colors pb-1">Külliyat</a>
+    <a href="#" class="hover:text-forest-text-light dark:hover:text-forest-text-dark transition-colors pb-1">Gelişim</a>
+    <a href="#" class="hover:text-forest-text-light dark:hover:text-forest-text-dark transition-colors pb-1">Sığınak</a>
+  </nav>
+
+  <div class="flex items-center gap-4">
+    <ThemeToggle />
+    <!-- Profile Mini -->
+    <div class="w-8 h-8 rounded-full bg-forest-accent-light/20 border border-forest-accent-light/50 dark:border-forest-accent-dark/50 overflow-hidden shadow-[0_0_10px_rgba(74,222,128,0.2)]">
+      <img src="/caretaker.png" alt="Profile" class="w-full h-full object-cover" />
+    </div>
+  </div>
+</header>
