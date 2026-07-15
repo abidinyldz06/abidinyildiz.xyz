@@ -1,17 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
-import { getStageInfo } from '../lib/growth';
 
 const seeds = await getCollection('seeds');
 const leaves = await getCollection('leaves');
 const currentPath = Astro.url.pathname;
 
 // Calculate stats
-const stageCount = { seed: 0, seedling: 0, sapling: 0, tree: 0 };
-seeds.forEach(s => {
-  const stage = getStageInfo(new Date(s.data.plantedAt)).key;
-  stageCount[stage]++;
-});
+const ancientCount = seeds.filter(seed => seed.data.maturity === 'ancient').length;
 ---
 <aside class="w-72 h-full glass-sidebar flex flex-col pt-12 pb-6 px-6 relative z-20 shrink-0 hidden md:flex">
   
@@ -47,9 +42,9 @@ seeds.forEach(s => {
       <span class="flex items-center gap-3"><span class="text-lg opacity-80">🌱</span> Fidanlık</span>
       <span class="text-xs bg-forest-accent-light/20 dark:bg-forest-accent-dark/20 text-forest-accent-light dark:text-forest-accent-dark px-2 py-0.5 rounded-full font-bold">{seeds.length}</span>
     </a>
-    <a href="/?stage=tree" class="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 text-forest-text-light/80 dark:text-forest-text-dark/70 font-medium rounded-lg text-sm transition-colors">
+    <a href="/kadim-agaclar" aria-current={currentPath === '/kadim-agaclar' ? 'page' : undefined} class:list={['flex items-center justify-between px-4 py-3 text-forest-text-light/80 dark:text-forest-text-dark/70 font-medium rounded-lg text-sm transition-colors', currentPath === '/kadim-agaclar' ? 'bg-black/5 dark:bg-white/5' : 'hover:bg-black/5 dark:hover:bg-white/5']}>
       <span class="flex items-center gap-3"><span class="text-lg opacity-60">🌲</span> Kadim Ağaçlar</span>
-      <span class="text-xs text-forest-text-light/40 dark:text-forest-text-dark/40 font-bold">{stageCount.tree}</span>
+      <span class="text-xs text-forest-text-light/40 dark:text-forest-text-dark/40 font-bold">{ancientCount}</span>
     </a>
     <a href="/yapraklar" aria-current={currentPath === '/yapraklar' ? 'page' : undefined} class:list={['flex items-center justify-between px-4 py-3 text-forest-text-light/80 dark:text-forest-text-dark/70 font-medium rounded-lg text-sm transition-colors', currentPath === '/yapraklar' ? 'bg-black/5 dark:bg-white/5' : 'hover:bg-black/5 dark:hover:bg-white/5']}>
       <span class="flex items-center gap-3"><span class="text-lg opacity-60">🍃</span> Tüm Yapraklar</span>

@@ -15,7 +15,7 @@ const totalLeaves = leaves.length;
 
 const stageCount = { seed: 0, seedling: 0, sapling: 0, tree: 0 };
 seeds.forEach(s => {
-  const stage = getStageInfo(new Date(s.data.plantedAt)).key;
+  const stage = s.data.maturity === 'ancient' ? 'tree' : getStageInfo(new Date(s.data.plantedAt)).key;
   stageCount[stage]++;
 });
 

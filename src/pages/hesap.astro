@@ -4,7 +4,7 @@ import TopNav from '../components/TopNav.astro';
 import { AVATARS, TITLES } from '../lib/caretaker';
 ---
 
-<Base title="Yaşayan Orman — Hesap Oluştur">
+<Base title="Bahçıvan Ayarları — Yaşayan Orman">
   <main id="main-content" class="flex-1 h-full min-w-0 flex flex-col relative z-10">
     <TopNav />
     
@@ -13,8 +13,9 @@ import { AVATARS, TITLES } from '../lib/caretaker';
         
         <!-- Header -->
         <div class="text-center mb-12">
-          <h2 class="text-4xl md:text-5xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark mb-3">Bahçıvanını Oluştur</h2>
-          <p class="text-forest-text-light/60 dark:text-forest-text-dark/60">Ormanın seni bekliyor. Karakterini seç ve bahçeni kur.</p>
+          <p class="text-xs font-bold uppercase tracking-[0.24em] text-forest-accent-light dark:text-forest-accent-dark mb-3">Tam ayarlar</p>
+          <h2 class="text-4xl md:text-5xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark mb-3">Bahçıvan Ayarları</h2>
+          <p class="text-forest-text-light/60 dark:text-forest-text-dark/60">Profilini, avatarını, unvanını ve bahçe kimliğini buradan düzenle.</p>
         </div>
 
         <form id="character-form" class="space-y-10">
@@ -79,7 +80,7 @@ import { AVATARS, TITLES } from '../lib/caretaker';
             class="w-full py-4 rounded-xl bg-forest-text-light dark:bg-[#1E3B2D] text-white dark:text-forest-accent-dark font-bold text-lg border border-transparent dark:border-forest-accent-dark/20 hover:opacity-90 transition-all shadow-xl dark:shadow-forest-glow/20 flex items-center justify-center gap-3 group"
           >
             <span class="text-2xl group-hover:scale-125 transition-transform">🌱</span>
-            Bahçemi Kur
+            Ayarları Kaydet
           </button>
           
         </form>

@@ -2,6 +2,7 @@
 ---
 <button
   id="theme-toggle"
+  type="button"
   class="relative p-2.5 rounded-xl bg-forest-text-light/5 dark:bg-white/5 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 hover:bg-forest-text-light/10 dark:hover:bg-white/10 hover:shadow-[0_0_15px_rgba(74,222,128,0.2)] transition-all duration-300 group overflow-hidden"
   aria-label="Renk temasını değiştir"
 >
@@ -22,5 +23,6 @@
     document.documentElement.classList.toggle('dark');
     const isDark = document.documentElement.classList.contains('dark');
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    window.dispatchEvent(new CustomEvent('theme-changed', { detail: isDark ? 'dark' : 'light' }));
   });
 </script>

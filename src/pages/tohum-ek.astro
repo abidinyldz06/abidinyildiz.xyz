@@ -52,18 +52,19 @@ import TopNav from '../components/TopNav.astro';
         <div id="result-container" class="mt-8 hidden">
           <h3 class="font-serif text-lg font-bold text-forest-text-light dark:text-forest-text-dark mb-2">Markdown Hazır!</h3>
           <p class="text-sm text-forest-text-light/70 dark:text-forest-text-dark/70 mb-4">
-            Bu içeriği kopyalayıp Obsidian'da <code class="bg-black/10 dark:bg-white/10 px-1 py-0.5 rounded">src/content/seeds/</code> klasörü içine yeni bir <b>.md</b> dosyası olarak kaydetmelisin.
+            Dosyayı indirip GitHub’daki <code class="bg-black/10 dark:bg-white/10 px-1 py-0.5 rounded">src/content/seeds/</code> klasörüne ekleyebilirsin. Özel yönetim ekranı tamamlandığında bu işlem doğrudan siteden yapılacak.
           </p>
           <div class="relative">
             <textarea id="md-output" readonly rows="12" class="w-full px-4 py-4 rounded-xl bg-black/5 dark:bg-black/40 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark font-mono text-sm resize-none"></textarea>
-            <button id="copy-btn" type="button" class="absolute top-4 right-4 px-3 py-1 bg-forest-accent-light text-white dark:bg-forest-accent-dark dark:text-black font-bold text-xs rounded shadow-md hover:scale-105 transition-transform">
-              Kopyala
-            </button>
+            <div class="absolute top-4 right-4 flex gap-2">
+              <button id="download-btn" type="button" class="px-3 py-1 bg-forest-text-light text-white dark:bg-white/10 dark:text-forest-text-dark font-bold text-xs rounded shadow-md hover:scale-105 transition-transform">İndir</button>
+              <button id="copy-btn" type="button" class="px-3 py-1 bg-forest-accent-light text-white dark:bg-forest-accent-dark dark:text-black font-bold text-xs rounded shadow-md hover:scale-105 transition-transform">Kopyala</button>
+            </div>
           </div>
           <div class="mt-4 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex gap-3">
             <span class="text-blue-500">💡</span>
             <p class="text-sm text-forest-text-light/80 dark:text-forest-text-dark/80">
-              Not: Statik bir site olduğu için bu dosyayı otomatik olarak diske yazamıyoruz. Obsidiana kopyalayıp yapıştırmak en güvenli entegrasyon yöntemidir.
+              Şimdilik içeriklerin güvenli kaynağı GitHub’dır. Bir sonraki aşamada giriş korumalı yönetim ekranı bu dosyayı otomatik commit edecek.
             </p>
           </div>
         </div>
@@ -78,6 +79,8 @@ import TopNav from '../components/TopNav.astro';
   const resultContainer = document.getElementById('result-container');
   const mdOutput = document.getElementById('md-output') as HTMLTextAreaElement;
   const copyBtn = document.getElementById('copy-btn');
+  const downloadBtn = document.getElementById('download-btn');
+  let markdownFilename = 'yeni-tohum.md';
 
   form?.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -97,6 +100,8 @@ plantedAt: ${date}
 icon: ${JSON.stringify(icon)}
 description: ${JSON.stringify(desc)}
 tags: [${tags.map(tag => JSON.stringify(tag)).join(', ')}]
+maturity: growing
+lastTended: ${date}
 ---
 
 # ${title}
@@ -105,24 +110,18 @@ Bu tohum ${date} tarihinde ekildi.
 `;
 
     mdOutput.value = md;
+    markdownFilename = `${title.toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ı/g, 'i').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'yeni-tohum'}.md`;
     resultContainer?.classList.remove('hidden');
-    
-    // Reward XP
-    const data = localStorage.getItem('caretaker');
-    if (data) {
-      try {
-        const c = JSON.parse(data);
-        c.xp += 15; // 15 XP for planting a seed
-        // Level up check
-        while (c.xp >= c.xpToNext) {
-          c.xp -= c.xpToNext;
-          c.level++;
-          c.xpToNext = Math.floor(100 * Math.pow(1.3, c.level - 1));
-        }
-        localStorage.setItem('caretaker', JSON.stringify(c));
-        // Simple visual feedback could be added here
-      } catch {}
-    }
+  });
+
+  downloadBtn?.addEventListener('click', () => {
+    const blob = new Blob([mdOutput.value], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = markdownFilename;
+    link.click();
+    URL.revokeObjectURL(url);
   });
 
   copyBtn?.addEventListener('click', async () => {

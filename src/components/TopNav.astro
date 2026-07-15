@@ -1,5 +1,6 @@
 ---
 import ThemeToggle from './ThemeToggle.astro';
+import SettingsModal from './SettingsModal.astro';
 
 const currentPath = Astro.url.pathname;
 const navItems = [
@@ -43,15 +44,17 @@ const isActive = (href: string) => href === '/'
     
     <ThemeToggle />
 
-    <a href="/hesap" aria-label="Profil ve ayarlar" class="hidden sm:block w-8 h-8 rounded-full bg-forest-accent-light/20 border border-forest-accent-light/50 dark:border-forest-accent-dark/50 overflow-hidden shadow-[0_0_10px_rgba(74,222,128,0.2)]">
+    <button id="profile-settings-btn" type="button" aria-label="Hızlı profil ve görünüm ayarlarını aç" aria-haspopup="dialog" class="hidden sm:block w-9 h-9 rounded-full bg-forest-accent-light/20 border border-forest-accent-light/50 dark:border-forest-accent-dark/50 overflow-hidden shadow-[0_0_10px_rgba(74,222,128,0.2)] hover:scale-105 transition-transform">
       <img id="topnav-avatar" src="/avatars/caretaker.png" alt="" class="w-full h-full object-cover" />
-    </a>
+    </button>
     
     <button id="mobile-menu-btn" type="button" aria-label="Menüyü aç" aria-controls="mobile-drawer" aria-expanded="false" class="xl:hidden text-forest-text-light dark:text-forest-text-dark p-2">
       <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
     </button>
   </div>
 </header>
+
+<SettingsModal />
 
 <div id="search-modal" role="dialog" aria-modal="true" aria-labelledby="search-title" aria-hidden="true" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-start justify-center pt-20 sm:pt-24 hidden opacity-0 transition-opacity">
   <div class="bg-forest-bg-light dark:bg-forest-bg-dark w-full max-w-2xl rounded-2xl shadow-2xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 overflow-hidden flex flex-col transform -translate-y-4 transition-transform duration-300 mx-4" id="search-modal-content">
@@ -76,6 +79,7 @@ const isActive = (href: string) => href === '/'
     {navItems.map(item => (
       <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} class:list={['rounded-xl px-4 py-3 transition-colors', isActive(item.href) ? 'bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 text-forest-accent-light dark:text-forest-accent-dark' : 'hover:bg-black/5 dark:hover:bg-white/5']}>{item.label}</a>
     ))}
+    <a href="/kadim-agaclar" class="rounded-xl px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5">Kadim Ağaçlar</a>
     <a href="/ekosistem" class="rounded-xl px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5">Ekosistem</a>
     <a href="/yapraklar" class="rounded-xl px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5">Tüm Yapraklar</a>
     <a href="/hesap" class="rounded-xl px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5">Profil ve Ayarlar</a>

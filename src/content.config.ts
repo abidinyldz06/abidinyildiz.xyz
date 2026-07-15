@@ -10,6 +10,9 @@ const seeds = defineCollection({
     icon: z.string().default('🌱'),
     description: z.string().default(''),
     tags: z.array(z.string()).default([]),
+    maturity: z.enum(['growing', 'ancient']).default('growing'),
+    thesis: z.string().optional(),
+    lastTended: z.coerce.date().optional(),
   }),
 });
 

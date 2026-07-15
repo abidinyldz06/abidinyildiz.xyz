@@ -1,0 +1,90 @@
+---
+import Base from '../layouts/Base.astro';
+import Sidebar from '../components/Sidebar.astro';
+import TopNav from '../components/TopNav.astro';
+import { getCollection } from 'astro:content';
+import { daysSince, formatTimeSince } from '../lib/growth';
+
+const seeds = await getCollection('seeds');
+const leaves = await getCollection('leaves');
+
+const describeSeed = (seed: (typeof seeds)[number]) => {
+  const seedLeaves = leaves.filter(leaf => leaf.data.seedRef === seed.id);
+  const ageScore = Math.min(20, Math.round(daysSince(seed.data.plantedAt) / 9));
+  const depthScore = Math.min(40, seedLeaves.length * 15);
+  const curationScore = seed.data.thesis ? 20 : 0;
+  const connectionScore = Math.min(20, new Set([...seed.data.tags, ...seedLeaves.flatMap(leaf => leaf.data.tags)]).size * 3);
+  return {
+    seed,
+    leaves: seedLeaves,
+    score: Math.min(100, ageScore + depthScore + curationScore + connectionScore),
+    lastUpdate: seed.data.lastTended || seedLeaves.sort((a, b) => b.data.date.getTime() - a.data.date.getTime())[0]?.data.date || seed.data.plantedAt,
+  };
+};
+
+const described = seeds.map(describeSeed);
+const ancientTrees = described.filter(item => item.seed.data.maturity === 'ancient');
+const candidates = described.filter(item => item.seed.data.maturity !== 'ancient').sort((a, b) => b.score - a.score);
+---
+
+<Base title="Kadim Ağaçlar — Yaşayan Orman" description="Zaman içinde olgunlaşmış, gözden geçirilmiş ve birbirine bağlanmış ana düşünce dosyaları.">
+  <Sidebar />
+  <main id="main-content" class="flex-1 h-full min-w-0 flex flex-col relative z-10">
+    <TopNav />
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-20">
+      <div class="max-w-6xl mx-auto">
+        <header class="mb-10">
+          <p class="text-xs font-bold uppercase tracking-[0.25em] text-amber-700 dark:text-amber-300 mb-3">Ormanın hafızası</p>
+          <h1 class="text-4xl md:text-5xl font-serif font-extrabold mb-3">Kadim Ağaçlar</h1>
+          <p class="max-w-3xl text-forest-text-light/65 dark:text-forest-text-dark/65">Kadim olmak yalnızca yaşlanmak değildir. Bu ağaçlar; farklı zamanlarda yeniden düşünülmüş, yapraklarla derinleşmiş ve bugünkü görüşümü taşıyan yaşayan konu dosyalarıdır.</p>
+        </header>
+
+        <section class="grid lg:grid-cols-2 gap-6 mb-12" aria-label="Kadim ağaçlar">
+          {ancientTrees.map(({ seed, leaves: treeLeaves, score, lastUpdate }) => (
+            <article class="dashboard-card relative overflow-hidden !p-0">
+              <div class="h-1.5 bg-gradient-to-r from-amber-400 via-emerald-500 to-forest-accent-light dark:to-forest-accent-dark"></div>
+              <div class="p-6 sm:p-8">
+                <div class="flex items-start justify-between gap-5">
+                  <div class="flex items-center gap-4">
+                    <span class="w-16 h-16 rounded-2xl bg-amber-500/10 flex items-center justify-center text-3xl">{seed.data.icon}</span>
+                    <div><p class="text-[10px] font-bold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">Kadim Ağaç</p><h2 class="text-2xl font-serif font-bold mt-1">{seed.data.title}</h2></div>
+                  </div>
+                  <span class="rounded-full bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 px-3 py-1 text-xs font-black text-forest-accent-light dark:text-forest-accent-dark">{score}/100</span>
+                </div>
+                <p class="mt-5 font-serif text-lg leading-relaxed text-forest-text-light/80 dark:text-forest-text-dark/80">{seed.data.thesis || seed.data.description}</p>
+                <dl class="grid grid-cols-3 gap-3 mt-6 text-center">
+                  <div class="rounded-xl bg-black/5 dark:bg-white/5 p-3"><dt class="text-[9px] uppercase tracking-widest opacity-50">Halka</dt><dd class="font-black mt-1">{treeLeaves.length}</dd></div>
+                  <div class="rounded-xl bg-black/5 dark:bg-white/5 p-3"><dt class="text-[9px] uppercase tracking-widest opacity-50">Gün</dt><dd class="font-black mt-1">{daysSince(seed.data.plantedAt)}</dd></div>
+                  <div class="rounded-xl bg-black/5 dark:bg-white/5 p-3"><dt class="text-[9px] uppercase tracking-widest opacity-50">Bakım</dt><dd class="font-bold text-xs mt-1">{formatTimeSince(lastUpdate)}</dd></div>
+                </dl>
+                <div class="flex gap-3 mt-6">
+                  <a href={`/seeds/${seed.id}`} class="flex-1 rounded-xl bg-forest-text-light dark:bg-forest-accent-dark text-white dark:text-[#07130b] text-center px-4 py-3 text-sm font-bold">Ağacı aç</a>
+                  <a href={`/ekosistem?focus=seed:${seed.id}`} aria-label={`${seed.data.title} ağacını ekosistemde gör`} class="rounded-xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 px-4 py-3 text-sm font-bold hover:bg-black/5 dark:hover:bg-white/5">Harita</a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </section>
+
+        <section aria-labelledby="candidate-title">
+          <div class="flex items-end justify-between gap-4 mb-5">
+            <div><p class="text-xs font-bold uppercase tracking-[0.22em] text-forest-accent-light dark:text-forest-accent-dark">Gelişen gövdeler</p><h2 id="candidate-title" class="text-2xl sm:text-3xl font-serif font-bold mt-1">Kadim olmaya yaklaşanlar</h2></div>
+            <span class="text-xs opacity-50">Son karar bahçıvanda</span>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            {candidates.map(({ seed, leaves: treeLeaves, score }) => (
+              <a href={`/seeds/${seed.id}`} class="dashboard-card group flex items-center gap-4">
+                <span class="w-12 h-12 rounded-xl bg-forest-accent-light/10 dark:bg-forest-accent-dark/10 flex items-center justify-center text-2xl">{seed.data.icon}</span>
+                <span class="flex-1 min-w-0">
+                  <span class="flex items-center justify-between gap-3"><strong class="font-serif text-lg">{seed.data.title}</strong><small class="font-black text-forest-accent-light dark:text-forest-accent-dark">{score}%</small></span>
+                  <span class="block h-1.5 rounded-full bg-black/10 dark:bg-white/10 mt-2 overflow-hidden"><i class="block h-full rounded-full bg-forest-accent-light dark:bg-forest-accent-dark" style={`width:${score}%`}></i></span>
+                  <span class="block text-xs opacity-50 mt-2">{treeLeaves.length} yaprak · {daysSince(seed.data.plantedAt)} günlük gelişim</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</Base>

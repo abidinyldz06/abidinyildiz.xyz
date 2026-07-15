@@ -170,6 +170,9 @@ const graphData = { nodes, links };
   let searchTerm = '';
   let view = { x: 0, y: 0, scale: 1 };
   let simulationFrames = 0;
+  const requestedFocusId = new URLSearchParams(window.location.search).get('focus');
+  const requestedFocusNode = requestedFocusId ? nodeById.get(requestedFocusId) : null;
+  let requestedFocusApplied = false;
 
   const palette = {
     root: '#fbbf24',
@@ -190,6 +193,13 @@ const graphData = { nodes, links };
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    if (requestedFocusNode && !requestedFocusApplied) {
+      hovered = requestedFocusNode;
+      view.scale = 1.35;
+      view.x = -requestedFocusNode.x * view.scale;
+      view.y = -requestedFocusNode.y * view.scale;
+      requestedFocusApplied = true;
+    }
     draw();
   };
 

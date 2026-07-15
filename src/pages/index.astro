@@ -14,7 +14,10 @@ const leaves = await getCollection('leaves');
 // Build seed cards with real growth calculation
 const seedCards = seeds.map((seed) => {
   const plantedAt = new Date(seed.data.plantedAt);
-  const stageInfo = getStageInfo(plantedAt);
+  const automaticStage = getStageInfo(plantedAt);
+  const stageInfo = seed.data.maturity === 'ancient'
+    ? { ...automaticStage, key: 'tree' as const, label: 'Kadim Ağaç', icon: '🌲', color: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/20' }
+    : automaticStage;
   
   // Count leaves for this seed
   const seedLeaves = leaves.filter(l => l.data.seedRef === seed.id);
@@ -180,21 +183,4 @@ const seedCards = seeds.map((seed) => {
   const validStages = new Set(['seed', 'seedling', 'sapling', 'tree']);
   applyFilter(requestedStage && validStages.has(requestedStage) ? requestedStage : 'all');
 
-  // Client-side Thirsty check
-  const localWateringStr = localStorage.getItem('watered_seeds');
-  if (localWateringStr) {
-    try {
-      const wateredSeeds = JSON.parse(localWateringStr);
-      document.querySelectorAll('.thirsty-badge').forEach(badge => {
-        const seedId = (badge as HTMLElement).dataset.seed;
-        if (seedId && wateredSeeds[seedId]) {
-          const lastWatered = new Date(wateredSeeds[seedId]);
-          const days = Math.floor((new Date().getTime() - lastWatered.getTime()) / (1000 * 60 * 60 * 24));
-          if (days < 14) {
-            badge.remove(); // Remove thirsty badge if watered recently
-          }
-        }
-      });
-    } catch {}
-  }
 </script>
