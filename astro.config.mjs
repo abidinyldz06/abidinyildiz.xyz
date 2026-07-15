@@ -15,7 +15,8 @@ export default defineConfig({
     remarkPlugins: [
       [remarkWikiLink, {
         aliasDivider: '|',
-        hrefTemplate: (permalink: string) => `/leaves/${permalink}`
+        /** @param {string} permalink */
+        hrefTemplate: (permalink) => `/leaves/${permalink}`
       }]
     ]
   },
