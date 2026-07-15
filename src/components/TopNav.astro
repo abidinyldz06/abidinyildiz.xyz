@@ -16,8 +16,51 @@ import ThemeToggle from './ThemeToggle.astro';
   <div class="flex items-center gap-4">
     <ThemeToggle />
     <!-- Profile Mini -->
-    <div class="w-8 h-8 rounded-full bg-forest-accent-light/20 border border-forest-accent-light/50 dark:border-forest-accent-dark/50 overflow-hidden shadow-[0_0_10px_rgba(74,222,128,0.2)]">
-      <img src="/caretaker.png" alt="Profile" class="w-full h-full object-cover" />
-    </div>
+    <a href="/hesap" class="w-8 h-8 rounded-full bg-forest-accent-light/20 border border-forest-accent-light/50 dark:border-forest-accent-dark/50 overflow-hidden shadow-[0_0_10px_rgba(74,222,128,0.2)] block">
+      <img id="topnav-avatar" src="/avatars/caretaker.png" alt="Profile" class="w-full h-full object-cover" />
+    </a>
+    
+    <!-- Mobile Menu Button -->
+    <button id="mobile-menu-btn" class="md:hidden text-forest-text-light dark:text-forest-text-dark p-2 focus:outline-none">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+    </button>
   </div>
 </header>
+
+<!-- Mobile Navigation Drawer -->
+<div id="mobile-drawer" class="fixed inset-0 bg-forest-bg-light/95 dark:bg-forest-bg-dark/95 z-50 transform translate-x-full transition-transform duration-300 md:hidden flex flex-col pt-20 px-8">
+  <button id="close-drawer-btn" class="absolute top-6 right-8 text-forest-text-light dark:text-forest-text-dark p-2">
+    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+  </button>
+  <nav class="flex flex-col gap-6 text-xl font-medium text-forest-text-light dark:text-forest-text-dark text-center">
+    <a href="/" class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark transition-colors">Fidanlık</a>
+    <a href="/ekosistem" class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark transition-colors">Ekosistem</a>
+    <a href="/gelisim" class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark transition-colors">Gelişim</a>
+    <a href="/hesap" class="hover:text-forest-accent-light dark:hover:text-forest-accent-dark transition-colors">Profil ve Ayarlar</a>
+  </nav>
+</div>
+
+<script>
+  // Topnav avatar sync
+  const data = localStorage.getItem('caretaker');
+  if (data) {
+    try {
+      const c = JSON.parse(data);
+      const av = document.getElementById('topnav-avatar') as HTMLImageElement;
+      if (av) av.src = c.avatar;
+    } catch {}
+  }
+
+  // Mobile Menu Logic
+  const menuBtn = document.getElementById('mobile-menu-btn');
+  const closeBtn = document.getElementById('close-drawer-btn');
+  const drawer = document.getElementById('mobile-drawer');
+
+  menuBtn?.addEventListener('click', () => {
+    drawer?.classList.remove('translate-x-full');
+  });
+
+  closeBtn?.addEventListener('click', () => {
+    drawer?.classList.add('translate-x-full');
+  });
+</script>

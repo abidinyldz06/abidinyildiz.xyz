@@ -1,0 +1,136 @@
+---
+import Base from '../layouts/Base.astro';
+import Sidebar from '../components/Sidebar.astro';
+import TopNav from '../components/TopNav.astro';
+---
+
+<Base title="Yaşayan Orman — Tohum Ek">
+  <Sidebar />
+  <main class="flex-1 h-full flex flex-col relative z-10">
+    <TopNav />
+    
+    <div class="flex-1 overflow-y-auto p-8">
+      <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="mb-10">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="text-3xl">🌱</span>
+            <h2 class="text-3xl md:text-4xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark">Yeni Tohum Ek</h2>
+          </div>
+          <p class="text-forest-text-light/60 dark:text-forest-text-dark/60 ml-12">Ormana yeni bir fikir, proje veya konu ekle.</p>
+        </div>
+
+        <form id="seed-form" class="space-y-6 bg-white/40 dark:bg-forest-card-dark p-8 rounded-2xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 shadow-lg">
+          
+          <div class="flex gap-4">
+            <div class="w-20">
+              <label class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">İkon</label>
+              <input type="text" id="seed-icon" value="🌱" class="w-full px-4 py-3 text-center rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-2xl focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all" required />
+            </div>
+            <div class="flex-1">
+              <label class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">Başlık</label>
+              <input type="text" id="seed-title" placeholder="Örn: Siyaset, Makine Öğrenmesi..." class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all font-medium" required />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">Kısa Açıklama</label>
+            <textarea id="seed-desc" rows="2" placeholder="Bu tohumun amacı nedir?" class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all resize-none"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">Etiketler (Virgülle ayırın)</label>
+            <input type="text" id="seed-tags" placeholder="Örn: fikir, proje, araştırma" class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all text-sm font-mono" />
+          </div>
+
+          <button type="submit" class="w-full py-4 rounded-xl bg-forest-text-light dark:bg-[#1E3B2D] text-white dark:text-forest-accent-dark font-bold border border-transparent dark:border-forest-accent-dark/20 hover:opacity-90 transition-all shadow-lg flex items-center justify-center gap-2">
+            <span>✨</span> Tohumu Yarat
+          </button>
+        </form>
+
+        <!-- Markdown Output Result -->
+        <div id="result-container" class="mt-8 hidden">
+          <h3 class="font-serif text-lg font-bold text-forest-text-light dark:text-forest-text-dark mb-2">Markdown Hazır!</h3>
+          <p class="text-sm text-forest-text-light/70 dark:text-forest-text-dark/70 mb-4">
+            Bu içeriği kopyalayıp Obsidian'da <code class="bg-black/10 dark:bg-white/10 px-1 py-0.5 rounded">src/content/seeds/</code> klasörü içine yeni bir <b>.md</b> dosyası olarak kaydetmelisin.
+          </p>
+          <div class="relative">
+            <textarea id="md-output" readonly rows="12" class="w-full px-4 py-4 rounded-xl bg-black/5 dark:bg-black/40 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-forest-text-light dark:text-forest-text-dark font-mono text-sm resize-none"></textarea>
+            <button id="copy-btn" class="absolute top-4 right-4 px-3 py-1 bg-forest-accent-light text-white dark:bg-forest-accent-dark dark:text-black font-bold text-xs rounded shadow-md hover:scale-105 transition-transform">
+              Kopyala
+            </button>
+          </div>
+          <div class="mt-4 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex gap-3">
+            <span class="text-blue-500">💡</span>
+            <p class="text-sm text-forest-text-light/80 dark:text-forest-text-dark/80">
+              Not: Statik bir site olduğu için bu dosyayı otomatik olarak diske yazamıyoruz. Obsidiana kopyalayıp yapıştırmak en güvenli entegrasyon yöntemidir.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</Base>
+
+<script>
+  const form = document.getElementById('seed-form');
+  const resultContainer = document.getElementById('result-container');
+  const mdOutput = document.getElementById('md-output') as HTMLTextAreaElement;
+  const copyBtn = document.getElementById('copy-btn');
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const title = (document.getElementById('seed-title') as HTMLInputElement).value.trim();
+    const icon = (document.getElementById('seed-icon') as HTMLInputElement).value.trim() || '🌱';
+    const desc = (document.getElementById('seed-desc') as HTMLTextAreaElement).value.trim();
+    const tagsRaw = (document.getElementById('seed-tags') as HTMLInputElement).value.trim();
+    
+    const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+    const date = new Date().toISOString().split('T')[0];
+    
+    // Generate Markdown
+    let md = `---
+title: "${title}"
+plantedAt: ${date}
+icon: "${icon}"
+description: "${desc}"
+tags: [${tags.join(', ')}]
+---
+
+# ${title}
+
+Bu tohum ${date} tarihinde ekildi.
+`;
+
+    mdOutput.value = md;
+    resultContainer?.classList.remove('hidden');
+    
+    // Reward XP
+    const data = localStorage.getItem('caretaker');
+    if (data) {
+      try {
+        const c = JSON.parse(data);
+        c.xp += 15; // 15 XP for planting a seed
+        // Level up check
+        while (c.xp >= c.xpToNext) {
+          c.xp -= c.xpToNext;
+          c.level++;
+          c.xpToNext = Math.floor(100 * Math.pow(1.3, c.level - 1));
+        }
+        localStorage.setItem('caretaker', JSON.stringify(c));
+        // Simple visual feedback could be added here
+      } catch {}
+    }
+  });
+
+  copyBtn?.addEventListener('click', () => {
+    mdOutput.select();
+    document.execCommand('copy');
+    copyBtn.textContent = 'Kopyalandı!';
+    setTimeout(() => {
+      copyBtn.textContent = 'Kopyala';
+    }, 2000);
+  });
+</script>

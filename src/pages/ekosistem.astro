@@ -1,0 +1,97 @@
+---
+import Base from '../layouts/Base.astro';
+import Sidebar from '../components/Sidebar.astro';
+import TopNav from '../components/TopNav.astro';
+
+import { getCollection } from 'astro:content';
+
+const seeds = await getCollection('seeds');
+const leaves = await getCollection('leaves');
+
+// Prepare graph data
+const graphNodes = seeds.map(s => ({
+  id: s.id,
+  label: `${s.data.icon} ${s.data.title}`,
+  group: 1, // seed
+  val: leaves.filter(l => l.data.seedRef === s.id).length * 2 + 5 // size
+}));
+
+leaves.forEach(l => {
+  graphNodes.push({
+    id: l.id,
+    label: l.data.title,
+    group: 2, // leaf
+    val: 2 // size
+  });
+});
+
+const graphLinks = leaves.map(l => ({
+  source: l.id,
+  target: l.data.seedRef
+}));
+
+const graphData = {
+  nodes: graphNodes,
+  links: graphLinks
+};
+---
+
+<Base title="Yaşayan Orman — Ekosistem">
+  <Sidebar />
+  <main class="flex-1 h-full flex flex-col relative z-10">
+    <TopNav />
+    
+    <div class="flex-1 p-8 flex flex-col h-full">
+      <div class="mb-4">
+        <h2 class="text-3xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark">Orman Ekosistemi</h2>
+        <p class="text-forest-text-light/60 dark:text-forest-text-dark/60">Fikirlerinin birbirine nasıl bağlandığını keşfet.</p>
+      </div>
+
+      <!-- Graph Container -->
+      <div id="graph-container" class="flex-1 bg-white/30 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 rounded-2xl overflow-hidden relative shadow-inner">
+        <!-- Loading overlay -->
+        <div id="loading" class="absolute inset-0 flex items-center justify-center text-forest-text-light/50 dark:text-forest-text-dark/50">
+          Zihin haritası yükleniyor...
+        </div>
+      </div>
+    </div>
+  </main>
+</Base>
+
+<!-- Force Graph Library -->
+<script src="https://unpkg.com/force-graph"></script>
+
+<script is:inline define:vars={{ graphData }}>
+  // Ensure the library is loaded before executing
+  window.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('graph-container');
+    const loading = document.getElementById('loading');
+    
+    if (container && window.ForceGraph) {
+      if (loading) loading.style.display = 'none';
+      
+      const isDark = document.documentElement.classList.contains('dark');
+      
+      const Graph = ForceGraph()(container)
+        .graphData(graphData)
+        .nodeLabel('label')
+        .nodeColor(node => node.group === 1 ? (isDark ? '#4ade80' : '#6ba887') : (isDark ? '#e0eee6' : '#2d4a3e'))
+        .linkColor(() => isDark ? 'rgba(74,222,128,0.2)' : 'rgba(107,168,135,0.2)')
+        .backgroundColor('transparent')
+        .nodeVal('val')
+        .onNodeClick(node => {
+          if (node.group === 1) {
+            window.location.href = `/seeds/${node.id}`;
+          } else {
+            window.location.href = `/leaves/${node.id}`;
+          }
+        });
+
+      // Handle resize
+      const resizeObserver = new ResizeObserver(() => {
+        Graph.width(container.clientWidth).height(container.clientHeight);
+      });
+      resizeObserver.observe(container);
+    }
+  });
+</script>

@@ -12,7 +12,7 @@ seeds.forEach(s => {
   stageCount[stage]++;
 });
 ---
-<aside class="w-72 h-full glass-sidebar flex flex-col pt-12 pb-6 px-6 relative z-20 shrink-0">
+<aside class="w-72 h-full glass-sidebar flex flex-col pt-12 pb-6 px-6 relative z-20 shrink-0 hidden md:flex">
   
   <!-- Profile Section (JS ile localStorage'dan dolacak) -->
   <div class="flex flex-col items-center text-center mb-8" id="profile-section">
@@ -54,10 +54,10 @@ seeds.forEach(s => {
       <span class="flex items-center gap-3"><span class="text-lg opacity-60">🍃</span> Tüm Yapraklar</span>
       <span class="text-xs text-forest-text-light/40 dark:text-forest-text-dark/40 font-bold">{leaves.length}</span>
     </a>
-    <a href="#" class="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 text-forest-text-light/80 dark:text-forest-text-dark/70 font-medium rounded-lg text-sm transition-colors">
+    <a href="/ekosistem" class="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 text-forest-text-light/80 dark:text-forest-text-dark/70 font-medium rounded-lg text-sm transition-colors">
       <span class="flex items-center gap-3"><span class="text-lg opacity-60">🕸️</span> Ekosistem</span>
     </a>
-    <a href="#" class="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 text-forest-text-light/80 dark:text-forest-text-dark/70 font-medium rounded-lg text-sm transition-colors">
+    <a href="/gelisim" class="flex items-center justify-between px-4 py-3 hover:bg-black/5 dark:hover:bg-white/5 text-forest-text-light/80 dark:text-forest-text-dark/70 font-medium rounded-lg text-sm transition-colors">
       <span class="flex items-center gap-3"><span class="text-lg opacity-60">📊</span> Gelişim</span>
     </a>
   </nav>
