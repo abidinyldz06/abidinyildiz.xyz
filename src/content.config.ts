@@ -23,4 +23,31 @@ const leaves = defineCollection({
   }),
 });
 
-export const collections = { seeds, leaves };
+const notes = defineCollection({
+  loader: glob({
+    pattern: "{dusunce,gunluk,hobi,kitap,oyun}/**/*.md",
+    base: "./src/content",
+  }),
+  schema: z.object({
+    title: z.string(),
+    garden: z.enum(['dusunce', 'gunluk', 'hobi', 'kitap', 'oyun']),
+    date: z.coerce.date(),
+    tags: z.array(z.string()).default([]),
+    mood: z.string().optional(),
+    gray: z.boolean().default(false),
+  }),
+});
+
+const now = defineCollection({
+  loader: glob({ pattern: "now.md", base: "./src/content" }),
+  schema: z.object({
+    updated: z.coerce.date(),
+    playing: z.string(),
+    reading: z.string(),
+    backlog: z.string(),
+    work: z.string(),
+    mood: z.string(),
+  }),
+});
+
+export const collections = { seeds, leaves, notes, now };

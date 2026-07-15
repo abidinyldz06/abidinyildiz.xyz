@@ -35,6 +35,11 @@
   html {
     scroll-behavior: smooth;
   }
+
+  :focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--color-forest-accent-light) 75%, white);
+    outline-offset: 3px;
+  }
   
   body {
     @apply bg-forest-bg-light text-forest-text-light font-sans transition-colors duration-500 overflow-hidden relative selection:bg-forest-accent-light/30;
@@ -66,6 +71,15 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 @layer utilities {
   .dashboard-card {
     @apply bg-white/40 dark:bg-forest-card-dark border border-forest-accent-light/20 dark:border-forest-accent-dark/10 rounded-2xl p-6 transition-all duration-300;
@@ -81,4 +95,26 @@
   .glow-text {
     @apply text-forest-accent-light dark:text-forest-accent-dark drop-shadow-[0_0_8px_rgba(74,222,128,0.5)];
   }
+
+  .content-prose {
+    @apply text-forest-text-light/80 dark:text-forest-text-dark/80 leading-8;
+  }
+
+  .content-prose h1,
+  .content-prose h2,
+  .content-prose h3 {
+    @apply text-forest-text-light dark:text-forest-text-dark font-serif font-bold mt-8 mb-4;
+  }
+
+  .content-prose h1 { @apply text-3xl; }
+  .content-prose h2 { @apply text-2xl; }
+  .content-prose h3 { @apply text-xl; }
+  .content-prose p,
+  .content-prose ul,
+  .content-prose ol,
+  .content-prose blockquote { @apply my-5; }
+  .content-prose ul { @apply list-disc pl-6; }
+  .content-prose ol { @apply list-decimal pl-6; }
+  .content-prose a { @apply text-forest-accent-light dark:text-forest-accent-dark underline underline-offset-4; }
+  .content-prose code { @apply rounded bg-black/10 dark:bg-white/10 px-1.5 py-0.5 text-sm; }
 }

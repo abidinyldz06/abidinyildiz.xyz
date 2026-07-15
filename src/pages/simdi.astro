@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import Sidebar from '../components/Sidebar.astro';
+import TopNav from '../components/TopNav.astro';
+import { getCollection } from 'astro:content';
+
+const entries = await getCollection('now');
+const now = entries[0]?.data;
+const formattedDate = now ? new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(now.updated) : '';
+const climate = now ? [
+  { icon: '🎮', label: 'Oynuyorum', value: now.playing },
+  { icon: '📖', label: 'Okuyorum', value: now.reading },
+  { icon: '🗺️', label: 'Sırada', value: now.backlog },
+  { icon: '💼', label: 'Çalışıyorum', value: now.work },
+  { icon: '🌤️', label: 'Ruh hali', value: now.mood },
+] : [];
+---
+
+<Base title="Şimdi — Yaşayan Orman" description="Abidin Yıldız’ın şu sıralar okuduğu, oynadığı ve üzerinde çalıştığı şeyler.">
+  <Sidebar />
+  <main id="main-content" class="flex-1 h-full min-w-0 flex flex-col relative z-10">
+    <TopNav />
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-20">
+      <div class="max-w-4xl mx-auto">
+        <p class="text-xs font-bold uppercase tracking-[0.25em] text-forest-accent-light dark:text-forest-accent-dark mb-3">Şu anki iklim</p>
+        <h1 class="text-4xl md:text-5xl font-serif font-extrabold text-forest-text-light dark:text-forest-text-dark mb-4">Şimdi ne yapıyorum?</h1>
+        <p class="text-forest-text-light/60 dark:text-forest-text-dark/60 mb-10">Bu sayfa bir durum fotoğrafı. Son güncelleme: {formattedDate || 'henüz belirtilmedi'}.</p>
+        {now ? <div class="grid sm:grid-cols-2 gap-5">
+          {climate.map((item, index) => <section class:list={['dashboard-card p-6', index === climate.length - 1 && 'sm:col-span-2']}>
+            <span class="text-3xl" aria-hidden="true">{item.icon}</span>
+            <p class="text-xs uppercase tracking-widest font-bold text-forest-accent-light dark:text-forest-accent-dark mt-5 mb-2">{item.label}</p>
+            <p class="text-lg font-serif font-bold text-forest-text-light dark:text-forest-text-dark">{item.value}</p>
+          </section>)}
+        </div> : <p class="dashboard-card p-8 text-center">Şimdi bilgisi henüz eklenmemiş.</p>}
+      </div>
+    </div>
+  </main>
+</Base>

@@ -43,10 +43,10 @@ const seedCards = seeds.map((seed) => {
   
   <Sidebar />
 
-  <main class="flex-1 h-full flex flex-col relative z-10">
+  <main id="main-content" class="flex-1 h-full min-w-0 flex flex-col relative z-10">
     <TopNav />
     
-    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 pb-20 md:pb-8">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-20 md:pb-8">
       <div class="max-w-7xl mx-auto flex flex-col xl:flex-row gap-8 xl:gap-12">
         
         <!-- Main Content Area -->
@@ -58,7 +58,7 @@ const seedCards = seeds.map((seed) => {
             </div>
             
             <div class="flex gap-2">
-              <button id="filter-toggle" type="button" aria-label="Filtreleri göster veya gizle" class="w-10 h-10 rounded-full bg-forest-text-light/5 dark:bg-white/5 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 flex items-center justify-center hover:bg-forest-text-light/10 dark:hover:bg-white/10 transition-colors">
+              <button id="filter-toggle" type="button" aria-label="Filtreleri göster veya gizle" aria-controls="filter-bar" aria-expanded="true" class="w-10 h-10 rounded-full bg-forest-text-light/5 dark:bg-white/5 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 flex items-center justify-center hover:bg-forest-text-light/10 dark:hover:bg-white/10 transition-colors">
                 <span class="text-forest-text-light dark:text-forest-text-dark">≡</span>
               </button>
             </div>
@@ -137,32 +137,48 @@ const seedCards = seeds.map((seed) => {
 </Base>
 
 <script>
-  // Filter functionality
+  const filterBar = document.getElementById('filter-bar');
+  const filterToggle = document.getElementById('filter-toggle');
+  const filterButtons = [...document.querySelectorAll<HTMLButtonElement>('.filter-btn')];
+
+  filterToggle?.addEventListener('click', () => {
+    const willHide = !filterBar?.classList.contains('hidden');
+    filterBar?.classList.toggle('hidden', willHide);
+    filterToggle.setAttribute('aria-expanded', String(!willHide));
+  });
+
+  const applyFilter = (filter: string) => {
+    filterButtons.forEach(button => {
+      const active = button.dataset.filter === filter;
+      button.classList.toggle('!bg-forest-text-light', active);
+      button.classList.toggle('!text-white', active);
+      button.classList.toggle('dark:!bg-forest-card-dark', active);
+      button.classList.toggle('dark:!text-forest-text-dark', active);
+      button.classList.toggle('shadow-lg', active);
+      button.classList.toggle('active', active);
+      button.classList.toggle('bg-forest-text-light/10', !active);
+      button.classList.toggle('dark:bg-white/5', !active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+
+    document.querySelectorAll<HTMLElement>('#seeds-grid > *').forEach(card => {
+      card.hidden = Boolean(card.dataset.stage) && filter !== 'all' && card.dataset.stage !== filter;
+    });
+  };
+
   document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const filter = (btn as HTMLElement).dataset.filter;
-      
-      // Update active button
-      document.querySelectorAll('.filter-btn').forEach(b => {
-        b.classList.remove('!bg-forest-text-light', '!text-white', 'dark:!bg-forest-card-dark', 'dark:!text-forest-text-dark', 'shadow-lg', 'active');
-        b.classList.add('bg-forest-text-light/10', 'dark:bg-white/5');
-        b.setAttribute('aria-pressed', 'false');
-      });
-      btn.classList.add('!bg-forest-text-light', '!text-white', 'dark:!bg-forest-card-dark', 'dark:!text-forest-text-dark', 'shadow-lg', 'active');
-      btn.classList.remove('bg-forest-text-light/10', 'dark:bg-white/5');
-      btn.setAttribute('aria-pressed', 'true');
-      
-      // Filter cards
-      document.querySelectorAll('#seeds-grid > *').forEach(card => {
-        const el = card as HTMLElement;
-        if (filter === 'all' || el.dataset.stage === filter || !el.dataset.stage) {
-          el.style.display = '';
-        } else {
-          el.style.display = 'none';
-        }
-      });
+      const filter = (btn as HTMLElement).dataset.filter || 'all';
+      applyFilter(filter);
+      const url = new URL(window.location.href);
+      filter === 'all' ? url.searchParams.delete('stage') : url.searchParams.set('stage', filter);
+      history.replaceState({}, '', url);
     });
   });
+
+  const requestedStage = new URLSearchParams(window.location.search).get('stage');
+  const validStages = new Set(['seed', 'seedling', 'sapling', 'tree']);
+  applyFilter(requestedStage && validStages.has(requestedStage) ? requestedStage : 'all');
 
   // Client-side Thirsty check
   const localWateringStr = localStorage.getItem('watered_seeds');

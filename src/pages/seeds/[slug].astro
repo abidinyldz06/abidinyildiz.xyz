@@ -34,10 +34,10 @@ const daysAlive = daysSince(plantedAt);
   
   <Sidebar />
 
-  <main class="flex-1 h-full flex flex-col relative z-10">
+  <main id="main-content" class="flex-1 h-full min-w-0 flex flex-col relative z-10">
     <TopNav />
     
-    <div class="flex-1 overflow-y-auto overflow-x-hidden p-8 pb-20">
+    <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-20">
       <div class="max-w-4xl mx-auto">
         
         <!-- Back -->
@@ -46,7 +46,7 @@ const daysAlive = daysSince(plantedAt);
         </a>
 
         <!-- Seed Header -->
-        <div class="dashboard-card p-8 mb-8 relative overflow-hidden">
+        <div class="dashboard-card p-5 sm:p-8 mb-8 relative overflow-hidden">
           <!-- Glow background -->
           <div class="absolute -top-20 -right-20 w-64 h-64 bg-forest-accent-light/10 dark:bg-forest-glow/10 rounded-full blur-3xl"></div>
           
@@ -100,7 +100,7 @@ const daysAlive = daysSince(plantedAt);
                   </div>
                 </div>
                 
-                <button id="water-btn" data-seed={seed.id} class="px-6 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 rounded-xl font-bold transition-all flex items-center gap-2 group relative overflow-hidden shrink-0">
+                <button id="water-btn" type="button" data-seed={seed.id} class="px-6 py-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 rounded-xl font-bold transition-all flex items-center gap-2 group relative overflow-hidden shrink-0">
                   <span class="absolute inset-0 bg-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity"></span>
                   <span class="text-xl group-hover:-translate-y-1 group-active:translate-y-0 transition-transform">💧</span> 
                   <span>Sula</span>

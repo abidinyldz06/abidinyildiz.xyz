@@ -9,4 +9,4 @@ gray: false
 
 Skalitz'de başladığımız bu macera gerçekten çok sürükleyici.
 
-İlgili: [[KCD İnceleme]]
+İlgili taslak: KCD İnceleme.

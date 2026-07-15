@@ -6,10 +6,10 @@ import TopNav from '../components/TopNav.astro';
 
 <Base title="Yaşayan Orman — Tohum Ek">
   <Sidebar />
-  <main class="flex-1 h-full flex flex-col relative z-10">
+  <main id="main-content" class="flex-1 h-full min-w-0 flex flex-col relative z-10">
     <TopNav />
     
-    <div class="flex-1 overflow-y-auto p-8">
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-20">
       <div class="max-w-2xl mx-auto">
         <!-- Header -->
         <div class="mb-10">
@@ -20,10 +20,10 @@ import TopNav from '../components/TopNav.astro';
           <p class="text-forest-text-light/60 dark:text-forest-text-dark/60 ml-12">Ormana yeni bir fikir, proje veya konu ekle.</p>
         </div>
 
-        <form id="seed-form" class="space-y-6 bg-white/40 dark:bg-forest-card-dark p-8 rounded-2xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 shadow-lg">
+        <form id="seed-form" class="space-y-6 bg-white/40 dark:bg-forest-card-dark p-5 sm:p-8 rounded-2xl border border-forest-accent-light/20 dark:border-forest-accent-dark/20 shadow-lg">
           
-          <div class="flex gap-4">
-            <div class="w-20">
+          <div class="flex flex-col sm:flex-row gap-4">
+            <div class="w-full sm:w-20">
               <label for="seed-icon" class="block text-sm font-bold text-forest-text-light dark:text-forest-text-dark mb-2">İkon</label>
               <input type="text" id="seed-icon" name="icon" value="🌱" class="w-full px-4 py-3 text-center rounded-xl bg-white/50 dark:bg-black/20 border border-forest-accent-light/20 dark:border-forest-accent-dark/20 text-2xl focus:outline-none focus:border-forest-accent-light dark:focus:border-forest-accent-dark transition-all" required />
             </div>
